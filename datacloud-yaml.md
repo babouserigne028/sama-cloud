@@ -17,12 +17,13 @@ données et les variables attendues. Il se place à la racine du dépôt Git du 
   un README. Le fichier ne contient **jamais de secret**.
 - **Base du devis** : les tailles déclarées servent à l'API pour calculer le prix.
 
-Le client décrit **ce qu'il veut** ; le moteur traduit en Docker (Dockerfile généré,
-conteneur, réseau isolé, sous-domaine, SSL). Le client n'écrit jamais de Docker,
-sauf s'il fournit son propre `Dockerfile`.
+Le client décrit **ce qu'il veut** ; le moteur construit l'image avec **Nixpacks** (ou avec
+le `Dockerfile` du projet s'il en fournit un), puis lance le conteneur dans un réseau
+isolé, et **Traefik** lui donne son sous-domaine en HTTPS. Le client n'écrit jamais de
+Docker, sauf s'il fournit son propre `Dockerfile`.
 
 ```
-datacloud.yaml  →  moteur (Souleymane)  →  Dockerfile + docker run + routage HTTPS
+datacloud.yaml  →  moteur (Souleymane)  →  Nixpacks + docker run + Traefik (HTTPS)
 ```
 
 ## 2. Exemple minimal
@@ -118,7 +119,7 @@ sur le réseau isolé du projet, peuvent s'y connecter.
 ## 5. Frameworks pris en charge
 
 Les valeurs par défaut sont une **proposition à confirmer par Souleymane** selon ce
-que le moteur sait construire (base : le détecteur de ShipiiX).
+que le moteur sait construire (base : la détection automatique de Nixpacks).
 
 | `framework` | Statut | Langage, version par défaut | `build` par défaut | `demarrage` par défaut | `port` | `sante.chemin` |
 |---|---|---|---|---|---|---|
@@ -199,12 +200,14 @@ redémarre le conteneur et déclenche l'alerte « mémoire saturée ».
 
 ## 8. Adresses publiques
 
-Proposition, **à confirmer par Souleymane** (domaine et DNS générique) :
+Validé avec Souleymane (domaine `samacloud.piitech.dev`, DNS générique `*.samacloud.piitech.dev`) :
 
-- Projet avec un seul service `web` : `https://<nom>.<domaine>`
-- Projet avec plusieurs services `web` : `https://<service>-<nom>.<domaine>`
+- Projet avec un seul service `web` : `https://<nom>.samacloud.piitech.dev`
+- Projet avec plusieurs services `web` : `https://<service>-<nom>.samacloud.piitech.dev`
 - En cas de conflit de nom entre comptes, l'API ajoute un suffixe court
   (`mon-blog-4f2a`).
+- Noms réservés, refusés pour un projet ou un service : `www`, `api`, `mcp`, `pay`,
+  `admin`.
 
 ## 9. Où le fichier est lu, et lequel gagne
 
@@ -259,7 +262,7 @@ En ajoutant cette ligne en tête du fichier, VS Code et Cursor (extension YAML d
 Hat) proposent l'autocomplétion et soulignent les erreurs avant tout déploiement :
 
 ```yaml
-# yaml-language-server: $schema=https://<domaine>/schemas/datacloud.schema.json
+# yaml-language-server: $schema=https://samacloud.piitech.dev/schemas/datacloud.schema.json
 ```
 
 ## 11. Exemples
@@ -356,7 +359,7 @@ bases:
     type: postgresql
 ```
 
-Adresses : `https://front-gestion-stock.<domaine>` et `https://api-gestion-stock.<domaine>`.
+Adresses : `https://front-gestion-stock.samacloud.piitech.dev` et `https://api-gestion-stock.samacloud.piitech.dev`.
 
 ### 11.4 Projet avec son propre Dockerfile
 
