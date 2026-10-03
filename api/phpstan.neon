@@ -1,0 +1,12 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    # Niveau 8 sur 10 : types vérifiés partout, y compris les valeurs « null ».
+    level: 8
+
+    paths:
+        - app
+        - bootstrap/app.php
+        - database
+        - routes

@@ -1,0 +1,25 @@
+# Services de développement LOCAL uniquement (la production est gérée par le module Infra).
+# Démarrer : docker compose up -d
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: samacloud-postgres
+    environment:
+      POSTGRES_DB: samacloud
+      POSTGRES_USER: samacloud
+      POSTGRES_PASSWORD: secret
+    ports:
+      # Joignable seulement depuis la machine du développeur.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - samacloud-pgdata:/var/lib/postgresql/data
+      # Crée aussi la base utilisée par les tests automatiques.
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U samacloud -d samacloud"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  samacloud-pgdata:
