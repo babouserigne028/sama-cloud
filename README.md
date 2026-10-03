@@ -3,10 +3,17 @@
 > **Pose tes questions. Montre ton code. Trouve ton équipe.**
 
 SamaCloud est la plateforme d'échange des développeurs africains. On y **pose ses
-questions**, on **présente ses projets avec leur code** lisible dans le navigateur, on
-**trouve des collaborateurs**, et on se fait connaître par ses contributions. Quand un
-projet est prêt, on le **met en ligne sur Datacloud** de Systalink, depuis son éditeur
-grâce à l'IA ou depuis le back-office, et on paie en FCFA par mobile money.
+questions**, on **présente ses projets avec leur code** (dépôt GitHub cloné et affiché
+dans un éditeur intégré), on **trouve des collaborateurs**, et on se fait connaître par
+ses contributions.
+
+Quand un projet est prêt, notre **moteur de déploiement** le met en ligne sur un serveur
+**Datacloud** de Systalink : il clone le dépôt, construit l'application avec Nixpacks, la
+lance dans un conteneur Docker isolé, et Traefik lui donne automatiquement son adresse
+`nom-du-projet.samacloud.app` en HTTPS. Le développeur pilote tout cela depuis le
+**back-office web** ou directement depuis son éditeur (VS Code, Cursor, Claude) grâce à
+notre **serveur MCP**, qui permet à l'IA de préparer le plan, le devis et le diagnostic,
+toujours avec validation humaine. Le paiement se fait en FCFA par **mobile money**.
 
 Projet présenté au concours **CADEV de Systalink** sur le thème
 « Une plateforme d'échange pour les développeurs, par les développeurs et pour les
