@@ -228,7 +228,7 @@ créer ce jeton et brancher le serveur MCP en moins de deux minutes.
 
 ### Feuille de route : serveur MCP distant avec OAuth
 
-Après le concours : héberger le serveur MCP en HTTP (`https://mcp.<domaine>`) avec une
+Après le concours : héberger le serveur MCP en HTTP (`https://mcp.samacloud.piitech.dev`) avec une
 connexion **OAuth**. Le développeur clique sur « Se connecter à SamaCloud » depuis
 Claude ou VS Code et n'a plus de jeton à copier. Le serveur MCP reste une façade sans
 logique métier : seule la manière d'obtenir le jeton change.
