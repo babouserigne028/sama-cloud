@@ -130,6 +130,7 @@ test('seules l\'inscription, la connexion et la lecture de la communauté sont p
         'GET /technologies',
         'GET /profils',
         'GET /profils/{pseudo}',
+        'GET /classement',
         'GET /questions',
         'GET /questions/{id}',
         'GET /questions/{id}/reponses',

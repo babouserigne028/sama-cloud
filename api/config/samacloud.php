@@ -19,6 +19,10 @@ return [
     'community' => [
         // Publications par minute et par compte (questions, réponses, votes), contre le spam.
         'posts_per_minute' => (int) env('COMMUNITY_POSTS_PER_MINUTE', 20),
+
+        // Anti-triche : âge minimum (en heures) du compte qui vote ou qui accepte une réponse pour que
+        // son geste rapporte des points. Empêche de créer des comptes à la chaîne pour gonfler un classement.
+        'min_account_age_hours_for_points' => (int) env('COMMUNITY_MIN_ACCOUNT_AGE_HOURS', 24),
     ],
 
     'auth' => [

@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Community\AcceptedAnswerController;
 use App\Http\Controllers\Community\AnswerController;
 use App\Http\Controllers\Community\AnswerVoteController;
+use App\Http\Controllers\Community\LeaderboardController;
 use App\Http\Controllers\Community\MyProfileController;
 use App\Http\Controllers\Community\NotificationController;
 use App\Http\Controllers\Community\ProfileController;
@@ -44,6 +45,7 @@ Route::get('profils', [ProfileController::class, 'index'])->name('profiles.index
 Route::get('profils/{pseudo}', [ProfileController::class, 'show'])
     ->where('pseudo', trim(UsernameRules::PATTERN, '/^$'))
     ->name('profiles.show');
+Route::get('classement', LeaderboardController::class)->name('leaderboard');
 Route::get('questions', [QuestionController::class, 'index'])->name('questions.index');
 Route::get('questions/{id}', [QuestionController::class, 'show'])->whereUlid('id')->name('questions.show');
 Route::get('questions/{id}/reponses', [AnswerController::class, 'index'])->whereUlid('id')->name('answers.index');

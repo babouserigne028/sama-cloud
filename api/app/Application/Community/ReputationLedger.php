@@ -6,6 +6,8 @@ namespace App\Application\Community;
 
 use App\Domain\Community\Enums\ReputationReason;
 use App\Models\ReputationEvent;
+use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -20,13 +22,17 @@ final class ReputationLedger
 
     /**
      * Donne des points. Les donner deux fois pour la même raison ne change rien :
-     * la base refuse le doublon, sans erreur.
+     * la base refuse le doublon, sans erreur. Le geste d'un compte trop récent ne rapporte rien.
      *
      * @param  int  $beneficiaryId  Compte qui gagne les points.
      * @param  int|null  $sourceUserId  Compte à l'origine des points (votant, auteur de la question).
      */
     public function award(int $beneficiaryId, ReputationReason $reason, string $subjectId, ?int $sourceUserId): void
     {
+        if ($sourceUserId !== null && $this->isTooRecent($sourceUserId)) {
+            return;
+        }
+
         DB::table('reputation_events')->insertOrIgnore([
             'user_id' => $beneficiaryId,
             'reason' => $reason->value,
@@ -36,6 +42,24 @@ final class ReputationLedger
             'source_user_id' => $sourceUserId,
             'created_at' => now(),
         ]);
+    }
+
+    /**
+     * Anti-triche : le geste d'un compte tout juste créé (vote, réponse acceptée) reste enregistré,
+     * mais ne rapporte pas de points. Sans cela, il suffirait de créer des comptes pour monter au classement.
+     */
+    private function isTooRecent(int $userId): bool
+    {
+        $minimumHours = config()->integer('samacloud.community.min_account_age_hours_for_points');
+
+        if ($minimumHours <= 0) {
+            return false;
+        }
+
+        return User::query()
+            ->whereKey($userId)
+            ->where('created_at', '>', CarbonImmutable::now()->subHours($minimumHours))
+            ->exists();
     }
 
     /**
