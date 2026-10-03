@@ -1,0 +1,852 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SamaCloud",
+        "version": "0.1.0",
+        "description": "API de contr\u00f4le de SamaCloud : comptes, jetons, projets, d\u00e9ploiements, commandes et \u00e9change.\n\nCette sp\u00e9cification est une **proposition d'API pour Datacloud**, \u00e9crite pour le concours CADEV. Ce n'est pas l'API officielle de Systalink.\n\nToutes les r\u00e9ponses de succ\u00e8s sont envelopp\u00e9es dans `data`. Toutes les erreurs ont la forme `{ code, message, details? }`, avec un message en fran\u00e7ais."
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "Serveur qui h\u00e9berge cette documentation"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Authentification"
+        },
+        {
+            "name": "Jetons IA"
+        }
+    ],
+    "security": [
+        {
+            "jeton": []
+        }
+    ],
+    "paths": {
+        "/inscription": {
+            "post": {
+                "operationId": "auth.register",
+                "description": "Cr\u00e9e un compte de d\u00e9veloppeur et le connecte aussit\u00f4t : la r\u00e9ponse contient\nle compte et un jeton de session.",
+                "summary": "Inscription",
+                "tags": [
+                    "Authentification"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "compte": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
+                                                "jeton": {
+                                                    "$ref": "#/components/schemas/IssuedTokenResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "compte",
+                                                "jeton"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `email_deja_utilise` \u2014 Deux inscriptions simultan\u00e9es avec la m\u00eame adresse.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/connexion": {
+            "post": {
+                "operationId": "auth.login",
+                "description": "V\u00e9rifie l'adresse e-mail et le mot de passe, puis renvoie le compte\net un nouveau jeton de session pour le back-office.",
+                "summary": "Connexion",
+                "tags": [
+                    "Authentification"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "compte": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
+                                                "jeton": {
+                                                    "$ref": "#/components/schemas/IssuedTokenResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "compte",
+                                                "jeton"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `identifiants_invalides` \u2014 Adresse e-mail ou mot de passe incorrect.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/moi": {
+            "get": {
+                "operationId": "auth.me",
+                "description": "Utilis\u00e9 par le serveur MCP au d\u00e9marrage pour v\u00e9rifier son jeton :\nquel compte agit, avec quel type de jeton et quelles capacit\u00e9s.",
+                "summary": "Compte et jeton courants",
+                "tags": [
+                    "Authentification"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "compte": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
+                                                "jeton": {
+                                                    "$ref": "#/components/schemas/AccessTokenResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "compte",
+                                                "jeton"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/deconnexion": {
+            "post": {
+                "operationId": "auth.logout",
+                "description": "R\u00e9voque le jeton de session utilis\u00e9 pour cet appel. Les autres sessions\net les jetons IA du compte restent valides.",
+                "summary": "D\u00e9connexion",
+                "tags": [
+                    "Authentification"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/jetons-ia": {
+            "get": {
+                "operationId": "agent-tokens.index",
+                "description": "Renvoie le nom, le d\u00e9but du jeton, les dates et le plafond \u2014 jamais la valeur du jeton.",
+                "summary": "Lister ses jetons IA",
+                "tags": [
+                    "Jetons IA"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `AccessTokenResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AccessTokenResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "agent-tokens.store",
+                "description": "La valeur du jeton est renvoy\u00e9e une seule fois, dans le champ \u00ab valeur \u00bb.",
+                "summary": "Cr\u00e9er un jeton IA",
+                "tags": [
+                    "Jetons IA"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreAgentTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`IssuedTokenResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/IssuedTokenResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `limite_jetons_atteinte` \u2014 Le compte a d\u00e9j\u00e0 le nombre maximum de jetons IA actifs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/jetons-ia/{id}": {
+            "delete": {
+                "operationId": "agent-tokens.destroy",
+                "description": "Effet imm\u00e9diat. Un jeton d'un autre compte, ou un jeton de session, est \u00ab introuvable \u00bb.",
+                "summary": "R\u00e9voquer un jeton IA",
+                "tags": [
+                    "Jetons IA"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "jeton": {
+                "type": "http",
+                "description": "Jeton de session (`sc_sess_\u2026`) ou jeton d'agent IA (`sc_live_\u2026`, `sc_test_\u2026`).",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "AccessTokenResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/TokenKind"
+                    },
+                    "prefixe": {
+                        "type": "string"
+                    },
+                    "capacites": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "plafond_mensuel_fcfa": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "derniere_utilisation": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "expire_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "nom",
+                    "type",
+                    "prefixe",
+                    "capacites",
+                    "plafond_mensuel_fcfa",
+                    "derniere_utilisation",
+                    "expire_le",
+                    "cree_le"
+                ],
+                "title": "AccessTokenResource"
+            },
+            "Erreur": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Identifiant stable de l'erreur, \u00e0 lire par les programmes.",
+                        "examples": [
+                            "quota_atteint"
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Explication en fran\u00e7ais, affichable telle quelle."
+                    },
+                    "details": {
+                        "description": "Pr\u00e9cisions \u00e9ventuelles. Pour une erreur de validation : liste de { champ, message }."
+                    }
+                },
+                "required": [
+                    "code",
+                    "message"
+                ],
+                "title": "Erreur"
+            },
+            "IssuedTokenResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/TokenKind"
+                    },
+                    "prefixe": {
+                        "type": "string"
+                    },
+                    "capacites": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "plafond_mensuel_fcfa": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "derniere_utilisation": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "expire_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    },
+                    "valeur": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "nom",
+                    "type",
+                    "prefixe",
+                    "capacites",
+                    "plafond_mensuel_fcfa",
+                    "derniere_utilisation",
+                    "expire_le",
+                    "cree_le",
+                    "valeur"
+                ],
+                "title": "IssuedTokenResource"
+            },
+            "LoginRequest": {
+                "type": "object",
+                "description": "Donn\u00e9es de connexion.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 255
+                    },
+                    "mot_de_passe": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "appareil": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Nom de l'appareil, pour reconna\u00eetre la session (ex. \u00ab Chrome sur Windows \u00bb).",
+                        "maxLength": 60
+                    }
+                },
+                "required": [
+                    "email",
+                    "mot_de_passe"
+                ],
+                "title": "LoginRequest"
+            },
+            "RegisterRequest": {
+                "type": "object",
+                "description": "Donn\u00e9es d'inscription d'un d\u00e9veloppeur.",
+                "properties": {
+                    "nom": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 100
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 255
+                    },
+                    "mot_de_passe": {
+                        "type": "string",
+                        "description": "\u00ab confirmed \u00bb : le champ mot_de_passe_confirmation doit \u00eatre identique."
+                    },
+                    "pays": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Code ISO du pays sur 2 lettres (ex. SN, CI, ML), facultatif.",
+                        "pattern": "^[A-Z]{2}$"
+                    },
+                    "mot_de_passe_confirmation": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "nom",
+                    "email",
+                    "mot_de_passe",
+                    "mot_de_passe_confirmation"
+                ],
+                "title": "RegisterRequest"
+            },
+            "StoreAgentTokenRequest": {
+                "type": "object",
+                "description": "Donn\u00e9es de cr\u00e9ation d'un jeton d'agent IA.",
+                "properties": {
+                    "nom": {
+                        "type": "string",
+                        "description": "Nom libre pour reconna\u00eetre le jeton (ex. \u00ab VS Code portable \u00bb).",
+                        "minLength": 2,
+                        "maxLength": 60
+                    },
+                    "expiration_jours": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 365
+                    },
+                    "plafond_mensuel_fcfa": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Plafond de d\u00e9pense mensuel de l'IA. Absent = pas de plafond.",
+                        "minimum": 0,
+                        "maximum": 100000000
+                    }
+                },
+                "required": [
+                    "nom"
+                ],
+                "title": "StoreAgentTokenRequest"
+            },
+            "TokenKind": {
+                "type": "string",
+                "description": "Type d'un jeton d'acc\u00e8s. C'est lui qui dit si une action vient d'un humain ou de l'IA.\n| |\n|---|\n| `session` <br/> Jeton du back-office, obtenu \u00e0 la connexion : c'est un humain qui agit. |\n| `agent_ia` <br/> Jeton donn\u00e9 au serveur MCP : c'est l'IA qui agit au nom du d\u00e9veloppeur. |",
+                "enum": [
+                    "session",
+                    "agent_ia"
+                ],
+                "title": "TokenKind"
+            },
+            "UserResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "pays": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/UserRole"
+                    },
+                    "demonstration": {
+                        "type": "boolean"
+                    },
+                    "credit_fcfa": {
+                        "type": "integer"
+                    },
+                    "cree_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "nom",
+                    "email",
+                    "pays",
+                    "role",
+                    "demonstration",
+                    "credit_fcfa",
+                    "cree_le"
+                ],
+                "title": "UserResource"
+            },
+            "UserRole": {
+                "type": "string",
+                "description": "R\u00f4le d'un compte. L'\u00ab agent IA \u00bb n'est pas un r\u00f4le de compte : c'est un type de jeton qui agit au nom d'un client (voir ActorType).\n| |\n|---|\n| `client` <br/> D\u00e9veloppeur qui d\u00e9ploie et g\u00e8re ses propres projets. |\n| `administrateur` <br/> Administrateur Systalink : catalogue, cr\u00e9dits, suspension de comptes. |",
+                "enum": [
+                    "client",
+                    "administrateur"
+                ],
+                "title": "UserRole"
+            }
+        }
+    }
+}
