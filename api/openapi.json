@@ -23,6 +23,9 @@
         },
         {
             "name": "D\u00e9ploiements"
+        },
+        {
+            "name": "Communaut\u00e9 \u2014 profils"
         }
     ],
     "security": [
@@ -1073,6 +1076,494 @@
                     }
                 }
             }
+        },
+        "/technologies": {
+            "get": {
+                "operationId": "technologies.index",
+                "description": "Liste de r\u00e9f\u00e9rence, par ordre alphab\u00e9tique. Leurs \u00ab slug \u00bb servent aux comp\u00e9tences\nd'un profil et aux filtres de recherche.",
+                "summary": "Lister les technologies",
+                "tags": [
+                    "Communaut\u00e9 \u2014 profils"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `TechnologyResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TechnologyResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/profils": {
+            "get": {
+                "operationId": "profiles.index",
+                "description": "Recherche publique par texte, pays, technologie et disponibilit\u00e9, 20 profils par page.\nLes comptes suspendus n'apparaissent pas.",
+                "summary": "Rechercher des profils",
+                "tags": [
+                    "Communaut\u00e9 \u2014 profils"
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Texte cherch\u00e9 dans le nom, le pseudo et la phrase de pr\u00e9sentation.",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 100
+                        }
+                    },
+                    {
+                        "name": "pays",
+                        "in": "query",
+                        "description": "Code pays sur 2 lettres (ex. SN).",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "pattern": "^[A-Z]{2}$"
+                        }
+                    },
+                    {
+                        "name": "technologie",
+                        "in": "query",
+                        "description": "Slug d'une technologie (ex. laravel).",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 40
+                        }
+                    },
+                    {
+                        "name": "disponibilite",
+                        "in": "query",
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/Availability"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "par_page",
+                        "in": "query",
+                        "description": "Nombre de profils par page (20 par d\u00e9faut, 50 au plus).",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ProfileResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProfileResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/profils/{pseudo}": {
+            "get": {
+                "operationId": "profiles.show",
+                "summary": "Voir un profil public",
+                "tags": [
+                    "Communaut\u00e9 \u2014 profils"
+                ],
+                "parameters": [
+                    {
+                        "name": "pseudo",
+                        "in": "path",
+                        "required": true,
+                        "description": "Pseudo du d\u00e9veloppeur (ex. awa-diop).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ProfileResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProfileResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/moi/profil": {
+            "get": {
+                "operationId": "my-profile.show",
+                "summary": "Voir son propre profil public",
+                "tags": [
+                    "Communaut\u00e9 \u2014 profils"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ProfileResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProfileResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "my-profile.update",
+                "description": "Seuls les champs envoy\u00e9s sont modifi\u00e9s. \u00ab technologies \u00bb remplace toute la liste des comp\u00e9tences.",
+                "summary": "Modifier son profil public",
+                "tags": [
+                    "Communaut\u00e9 \u2014 profils"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProfileRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ProfileResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProfileResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `pseudo_deja_pris` \u2014 Le pseudo vient d'\u00eatre pris par un autre d\u00e9veloppeur.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1149,6 +1640,16 @@
                     "systeme"
                 ],
                 "title": "ActorType"
+            },
+            "Availability": {
+                "type": "string",
+                "description": "Disponibilit\u00e9 affich\u00e9e sur un profil public.\n| |\n|---|\n| `disponible` <br/> Cherche activement une mission, un emploi ou une \u00e9quipe. |\n| `a_l_ecoute` <br/> Pas en recherche, mais pr\u00eat \u00e0 \u00e9couter une proposition. |\n| `indisponible` <br/> Ne souhaite pas \u00eatre contact\u00e9 pour le moment. |",
+                "enum": [
+                    "disponible",
+                    "a_l_ecoute",
+                    "indisponible"
+                ],
+                "title": "Availability"
             },
             "DeploymentResource": {
                 "type": "object",
@@ -1463,6 +1964,92 @@
                 ],
                 "title": "OperationType"
             },
+            "ProfileResource": {
+                "type": "object",
+                "properties": {
+                    "pseudo": {
+                        "type": "string"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "titre": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Phrase de pr\u00e9sentation courte."
+                    },
+                    "bio": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "pays": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Code pays sur 2 lettres."
+                    },
+                    "disponibilite": {
+                        "$ref": "#/components/schemas/Availability"
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TechnologyResource"
+                        }
+                    },
+                    "liens": {
+                        "type": "object",
+                        "properties": {
+                            "github": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "site": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "linkedin": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "github",
+                            "site",
+                            "linkedin"
+                        ]
+                    },
+                    "membre_depuis": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "pseudo",
+                    "nom",
+                    "titre",
+                    "bio",
+                    "pays",
+                    "disponibilite",
+                    "technologies",
+                    "liens",
+                    "membre_depuis"
+                ],
+                "title": "ProfileResource"
+            },
             "ProjectDatabaseResource": {
                 "type": "object",
                 "properties": {
@@ -1720,6 +2307,23 @@
                 },
                 "title": "StoreDeploymentRequest"
             },
+            "TechnologyResource": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string",
+                        "description": "Identifiant \u00e0 utiliser dans les filtres et les formulaires (ex. \u00ab laravel \u00bb)."
+                    },
+                    "nom": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "slug",
+                    "nom"
+                ],
+                "title": "TechnologyResource"
+            },
             "TokenKind": {
                 "type": "string",
                 "description": "Type d'un jeton d'acc\u00e8s. C'est lui qui dit si une action vient d'un humain ou de l'IA.\n| |\n|---|\n| `session` <br/> Jeton du back-office, obtenu \u00e0 la connexion : c'est un humain qui agit. |\n| `agent_ia` <br/> Jeton donn\u00e9 au serveur MCP : c'est l'IA qui agit au nom du d\u00e9veloppeur. |",
@@ -1728,6 +2332,81 @@
                     "agent_ia"
                 ],
                 "title": "TokenKind"
+            },
+            "UpdateProfileRequest": {
+                "type": "object",
+                "description": "Modification de son propre profil public. Tous les champs sont facultatifs :\nseuls ceux qui sont envoy\u00e9s sont modifi\u00e9s.",
+                "properties": {
+                    "nom": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 100
+                    },
+                    "pays": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^[A-Z]{2}$"
+                    },
+                    "pseudo": {
+                        "type": "string",
+                        "description": "Minuscules, chiffres et tirets, 3 \u00e0 24 caract\u00e8res.",
+                        "pattern": "^[a-z0-9][a-z0-9-]{1,22}[a-z0-9]$"
+                    },
+                    "titre": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 100
+                    },
+                    "bio": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    },
+                    "disponibilite": {
+                        "$ref": "#/components/schemas/Availability"
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "description": "Liste compl\u00e8te des comp\u00e9tences \u00e0 garder (slugs), 15 au plus.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "maxItems": 15,
+                        "uniqueItems": true
+                    },
+                    "github": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Liens en HTTPS uniquement : jamais de \u00ab javascript: \u00bb ni d'adresse non chiffr\u00e9e.",
+                        "pattern": "^https:\\/\\/github\\.com\\/[A-Za-z0-9-]+\\/?$",
+                        "maxLength": 255
+                    },
+                    "site": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri",
+                        "maxLength": 255
+                    },
+                    "linkedin": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^https:\\/\\/([a-z]{2,3}\\.)?linkedin\\.com\\/in\\/[A-Za-z0-9\\-_%]+\\/?$",
+                        "maxLength": 255
+                    }
+                },
+                "title": "UpdateProfileRequest"
             },
             "UserResource": {
                 "type": "object",

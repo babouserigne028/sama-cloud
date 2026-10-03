@@ -19,7 +19,7 @@ test('avec un jeton de session, /api/moi décrit le compte et un jeton humain', 
         ->assertJsonPath('data.compte.nom', 'Awa Diop')
         ->assertJsonPath('data.jeton.type', 'session')
         ->assertJsonPath('data.jeton.capacites', [
-            'projets:lire', 'projets:ecrire', 'projets:supprimer', 'echange:publier', 'jetons:gerer',
+            'projets:lire', 'projets:ecrire', 'projets:supprimer', 'echange:publier', 'profil:modifier', 'jetons:gerer',
         ])
         ->assertJsonMissingPath('data.jeton.valeur')
         ->assertJsonMissingPath('data.jeton.token');

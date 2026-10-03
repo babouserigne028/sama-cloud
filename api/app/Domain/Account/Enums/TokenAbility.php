@@ -15,12 +15,15 @@ enum TokenAbility: string
     case ProjectsDelete = 'projets:supprimer';
     case ExchangePublish = 'echange:publier';
 
+    /** Modifier son profil public : réservé à la session du navigateur. */
+    case ManageProfile = 'profil:modifier';
+
     /** Créer, lister et révoquer des jetons : réservé à la session du navigateur. */
     case ManageTokens = 'jetons:gerer';
 
     /**
      * Capacités données à un jeton selon son type.
-     * Un jeton d'agent IA ne reçoit jamais la gestion des jetons.
+     * Un jeton d'agent IA ne reçoit jamais la gestion des jetons ni celle du profil.
      *
      * @return list<self>
      */
@@ -35,7 +38,7 @@ enum TokenAbility: string
 
         return match ($kind) {
             TokenKind::Agent => $agentAbilities,
-            TokenKind::Session => [...$agentAbilities, self::ManageTokens],
+            TokenKind::Session => [...$agentAbilities, self::ManageProfile, self::ManageTokens],
         };
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Application\Community\Actions\CreateProfile;
 use App\Domain\Account\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -39,6 +40,16 @@ class UserFactory extends Factory
             'credit_fcfa' => 0,
             'suspended_at' => null,
         ];
+    }
+
+    /**
+     * Comme à l'inscription réelle, chaque compte fabriqué reçoit son profil public.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            app(CreateProfile::class)->handle($user);
+        });
     }
 
     /**

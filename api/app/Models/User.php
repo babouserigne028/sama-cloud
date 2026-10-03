@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -68,6 +69,16 @@ class User extends Authenticatable
             'credit_fcfa' => 'integer',
             'suspended_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Profil public du développeur (créé en même temps que le compte).
+     *
+     * @return HasOne<Profile, $this>
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class);
     }
 
     /**

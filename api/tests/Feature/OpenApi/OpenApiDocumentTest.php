@@ -98,7 +98,7 @@ test('toutes les routes annoncent la limite de débit', function () {
     }
 });
 
-test('seules l\'inscription et la connexion sont publiques ; le reste exige un jeton', function () {
+test('seules l\'inscription, la connexion et la lecture de la communauté sont publiques', function () {
     $document = generatedOpenApiDocument();
 
     expect($document['security'])->toBe([['jeton' => []]])
@@ -119,7 +119,13 @@ test('seules l\'inscription et la connexion sont publiques ; le reste exige un j
             ->and(array_key_exists('403', $operation['responses']))->toBeTrue($name);
     }
 
-    expect($publicOperations)->toEqualCanonicalizing(['POST /inscription', 'POST /connexion']);
+    expect($publicOperations)->toEqualCanonicalizing([
+        'POST /inscription',
+        'POST /connexion',
+        'GET /technologies',
+        'GET /profils',
+        'GET /profils/{pseudo}',
+    ]);
 });
 
 test('les erreurs métier déclarées sur une action apparaissent dans la spécification', function () {
