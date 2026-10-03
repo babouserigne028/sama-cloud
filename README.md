@@ -10,7 +10,7 @@ ses contributions.
 Quand un projet est prêt, notre **moteur de déploiement** le met en ligne sur un serveur
 **Datacloud** de Systalink : il clone le dépôt, construit l'application avec Nixpacks, la
 lance dans un conteneur Docker isolé, et Traefik lui donne automatiquement son adresse
-`nom-du-projet.samacloud.app` en HTTPS. Le développeur pilote tout cela depuis le
+`nom-du-projet.samacloud.piitech.dev` en HTTPS. Le développeur pilote tout cela depuis le
 **back-office web** ou directement depuis son éditeur (VS Code, Cursor, Claude) grâce à
 notre **serveur MCP**, qui permet à l'IA de préparer le plan, le devis et le diagnostic,
 toujours avec validation humaine. Le paiement se fait en FCFA par **mobile money**.
@@ -134,7 +134,7 @@ flowchart TB
 ```
 
 - Tout le trafic entre par Traefik, qui crée la route et le certificat HTTPS de chaque
-  nouveau conteneur à partir de ses étiquettes Docker (`*.samacloud.app`).
+  nouveau conteneur à partir de ses étiquettes Docker (`*.samacloud.piitech.dev`).
 - Le back-office et le serveur MCP appellent l'API avec le jeton du client.
 - Seul le worker de déploiement pilote Docker.
 - Les bases de données des clients ne sont jamais exposées sur internet.
@@ -154,7 +154,7 @@ puisse l'expliquer.
 | API de contrôle | Laravel, Sanctum, files Laravel |
 | Serveur MCP | TypeScript, SDK MCP officiel |
 | Données | PostgreSQL |
-| Exécution | Git, Nixpacks, Docker, Traefik (Let's Encrypt), DNS générique `*.samacloud.app` |
+| Exécution | Git, Nixpacks, Docker, Traefik (Let's Encrypt), DNS générique `*.samacloud.piitech.dev` |
 | Qualité | Pest, build Angular, CI, contrôle des licences |
 
 ---
@@ -180,7 +180,7 @@ Développeur : « Oui. »
 
 IA : Voici votre lien de paiement, valable 15 minutes : https://…
      … paiement confirmé, déploiement en cours …
-     Votre blog est en ligne : https://mon-blog.samacloud.app
+     Votre blog est en ligne : https://mon-blog.samacloud.piitech.dev
 ```
 
 ### Fonctionnalités clés
@@ -323,7 +323,7 @@ agrégateur (PayDunya, CinetPay, Hub2) en secours ; un **mode test simulé** pou
 - Docker accessible uniquement au worker de déploiement (Traefik en lecture seule) ;
   seul Traefik est exposé sur internet.
 - Noms de sous-domaines réservés (`www`, `api`, `mcp`, `pay`, `admin`) ; cookies de la
-  plateforme limités à `samacloud.app`.
+  plateforme limités à `samacloud.piitech.dev`.
 - Dépôts clonés pour la vitrine : `.env`, binaires, `node_modules` et `vendor` écartés.
 - Quotas par compte et plafond de mémoire par conteneur.
 - **L'IA ne paie jamais** : elle génère un lien, un humain valide.
