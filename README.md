@@ -10,8 +10,8 @@ et d'**échanger** avec les autres développeurs templates, composants et soluti
 Projet présenté au concours **CADEV de Systalink** sur le thème
 « Construire la plateforme d'échange africaine, pour les devs, par les devs ».
 
-> 🚧 **Projet en cours de développement** — sprint 1 sur 4. Les sections marquées
-> *(à venir)* seront complétées au fil des sprints.
+> 🚧 **Projet en cours de développement.** Les sections marquées *(à venir)* seront
+> complétées prochainement.
 
 ---
 
@@ -31,7 +31,6 @@ Projet présenté au concours **CADEV de Systalink** sur le thème
 - [Compte de démonstration](#compte-de-démonstration)
 - [Documentation](#documentation)
 - [Équipe](#équipe)
-- [Planning](#planning)
 - [Limites assumées](#limites-assumées)
 - [Feuille de route](#feuille-de-route)
 - [Conformité au règlement](#conformité-au-règlement)
@@ -319,7 +318,7 @@ agrégateur (PayDunya, CinetPay, Hub2) en secours ; un **mode test simulé** pou
 
 ## Structure du dépôt
 
-État actuel (sprint 1) :
+État actuel :
 
 ```text
 .
@@ -345,7 +344,7 @@ Organisation prévue *(à venir)* :
 
 ## Installation
 
-*(à venir — sprint 2)*
+*(à venir)*
 
 Prérequis prévus : PHP 8.3, Composer, Node.js 22, PostgreSQL 16, Docker.
 
@@ -364,11 +363,11 @@ arrive sur une plateforme vivante : projets en ligne, graphiques remplis, un dé
 
 | Document | Contenu |
 |---|---|
-| [Cahier des charges](Cahier%20des%20charges%20—%20SamaCloud.pdf) | Contexte, modules, architecture, règles de gestion, planning |
+| [Cahier des charges](Cahier%20des%20charges%20—%20SamaCloud.pdf) | Contexte, modules, architecture, règles de gestion |
 | [`outils-mcp.md`](outils-mcp.md) | Outils MCP par niveau de risque, ressources, prompts, authentification, endpoints requis |
 | [`datacloud-yaml.md`](datacloud-yaml.md) | Spécification du format `datacloud.yaml` |
 | [`datacloud.schema.json`](datacloud.schema.json) | Schéma JSON de validation |
-| Spécification OpenAPI | *(à venir — sprint 1)* |
+| Spécification OpenAPI | *(à venir)* |
 
 ---
 
@@ -381,20 +380,6 @@ arrive sur une plateforme vivante : projets en ligne, graphiques remplis, un dé
 | Souleymane Ndao | Moteur de déploiement |
 | Serigne Abdoulaye Babou | Serveur MCP (TypeScript) |
 | Amadou Deme | Paiement, administration et qualité |
-
----
-
-## Planning
-
-Quatre sprints d'une semaine, chacun terminé par une démo.
-
-| Sprint | Dates | Objectif |
-|---|---|---|
-| 1 · Fondations | 2 – 7 oct. | Tout est prêt pour coder |
-| 2 · Premier déploiement | 8 – 12 oct. | Un dépôt Git déployé de bout en bout, visible dans le back-office |
-| 3 · Payer et piloter | 13 – 17 oct. | Devis, paiement et pilotage par l'IA avec validation |
-| 4 · Échanger et démontrer | 18 – 22 oct. | Couche d'échange, auto-diagnostic, démo prête |
-| **Soumission** | **23 oct.** | |
 
 ---
 
