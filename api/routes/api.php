@@ -8,12 +8,18 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DeploymentController;
+use App\Http\Controllers\OperationController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 /*
  * Routes de l'API SamaCloud (préfixe automatique : /api).
  * Elles sont ajoutées module par module : authentification, projets, déploiements…
  */
+
+// Format d'un nom de projet, identique à datacloud.schema.json. Un nom mal formé donne 404.
+$projectName = '[a-z][a-z0-9-]{1,28}[a-z0-9]';
 
 // --- Authentification : routes publiques, avec une limite d'essais renforcée ---
 Route::middleware('throttle:auth')->group(function () {
@@ -22,7 +28,7 @@ Route::middleware('throttle:auth')->group(function () {
 });
 
 // --- Routes qui exigent un jeton valide et un compte non suspendu ---
-Route::middleware(['auth:sanctum', 'account.active'])->group(function () {
+Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($projectName) {
     Route::get('moi', MeController::class)->name('auth.me');
 
     // Réservé à la session du navigateur : un jeton d'agent IA n'a pas la capacité « jetons:gerer ».
@@ -34,5 +40,26 @@ Route::middleware(['auth:sanctum', 'account.active'])->group(function () {
         Route::delete('jetons-ia/{id}', [AgentTokenController::class, 'destroy'])
             ->whereNumber('id')
             ->name('agent-tokens.destroy');
+    });
+
+    // Lecture des projets, des déploiements et des opérations (humain ou IA).
+    Route::middleware('abilities:'.TokenAbility::ProjectsRead->value)->group(function () use ($projectName) {
+        Route::get('projets', [ProjectController::class, 'index'])->name('projects.index');
+        Route::get('projets/{projet}', [ProjectController::class, 'show'])
+            ->where('projet', $projectName)
+            ->name('projects.show');
+        Route::get('projets/{projet}/deploiements', [DeploymentController::class, 'index'])
+            ->where('projet', $projectName)
+            ->name('deployments.index');
+        Route::get('operations/{id}', [OperationController::class, 'show'])
+            ->whereUlid('id')
+            ->name('operations.show');
+    });
+
+    // Écriture sur les projets (humain ou IA).
+    Route::middleware('abilities:'.TokenAbility::ProjectsWrite->value)->group(function () use ($projectName) {
+        Route::post('projets/{projet}/deploiements', [DeploymentController::class, 'store'])
+            ->where('projet', $projectName)
+            ->name('deployments.store');
     });
 });

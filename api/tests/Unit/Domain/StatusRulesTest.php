@@ -60,3 +60,23 @@ test('seule une valeur publique n\'est pas sensible', function (VariableOrigin $
     'secret fourni' => [VariableOrigin::Secret, true],
     'secret généré' => [VariableOrigin::Generated, true],
 ]);
+
+test('seul un projet en ligne ou en échec peut être déployé', function (ProjectStatus $status, bool $deployable) {
+    expect($status->canBeDeployed())->toBe($deployable);
+})->with([
+    'en attente de paiement' => [ProjectStatus::PendingPayment, false],
+    'provisionnement' => [ProjectStatus::Provisioning, false],
+    'actif' => [ProjectStatus::Active, true],
+    'en échec' => [ProjectStatus::Failed, true],
+    'arrêté' => [ProjectStatus::Stopped, false],
+    'en suppression' => [ProjectStatus::Deleting, false],
+]);
+
+test('les déploiements en cours sont exactement ceux qui ne sont pas terminés', function () {
+    $unfinished = array_values(array_filter(
+        DeploymentStatus::cases(),
+        fn (DeploymentStatus $status) => ! $status->isFinished(),
+    ));
+
+    expect(DeploymentStatus::inProgress())->toBe($unfinished);
+});

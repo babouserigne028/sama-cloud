@@ -25,6 +25,16 @@ enum DeploymentStatus: string
     case Failed = 'echec';
 
     /**
+     * États d'un déploiement qui n'est pas encore terminé.
+     *
+     * @return list<self>
+     */
+    public static function inProgress(): array
+    {
+        return [self::Queued, self::Building, self::Releasing];
+    }
+
+    /**
      * Un déploiement terminé (en ligne ou en échec) ne change plus jamais d'état.
      */
     public function isFinished(): bool

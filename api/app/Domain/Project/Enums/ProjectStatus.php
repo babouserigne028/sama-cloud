@@ -28,6 +28,15 @@ enum ProjectStatus: string
     case Deleting = 'suppression';
 
     /**
+     * Peut-on lancer un déploiement ? Oui si le projet est en ligne, ou si son dernier
+     * déploiement a échoué (on corrige le code et on relance, sans nouveau paiement).
+     */
+    public function canBeDeployed(): bool
+    {
+        return $this === self::Active || $this === self::Failed;
+    }
+
+    /**
      * Ce projet occupe-t-il une place dans le quota « projets actifs » du compte ?
      * Un projet arrêté ou en cours de suppression ne compte plus.
      */

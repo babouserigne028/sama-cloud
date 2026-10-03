@@ -17,6 +17,12 @@
         },
         {
             "name": "Jetons IA"
+        },
+        {
+            "name": "Projets"
+        },
+        {
+            "name": "D\u00e9ploiements"
         }
     ],
     "security": [
@@ -533,6 +539,540 @@
                     }
                 }
             }
+        },
+        "/projets": {
+            "get": {
+                "operationId": "projects.index",
+                "description": "Renvoie tous les projets du compte, du plus r\u00e9cent au plus ancien, avec leur statut,\nleur adresse, leurs services, leurs bases et leur \u00e9ch\u00e9ance.",
+                "summary": "Lister ses projets",
+                "tags": [
+                    "Projets"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `ProjectResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProjectResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/projets/{projet}": {
+            "get": {
+                "operationId": "projects.show",
+                "summary": "D\u00e9tail d'un projet",
+                "tags": [
+                    "Projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "projet",
+                        "in": "path",
+                        "required": true,
+                        "description": "Nom du projet (ex. mon-blog).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ProjectResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ProjectResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/projets/{projet}/deploiements": {
+            "get": {
+                "operationId": "deployments.index",
+                "description": "Du plus r\u00e9cent au plus ancien, 20 par page. Chaque d\u00e9ploiement indique\ns'il a \u00e9t\u00e9 demand\u00e9 par un humain ou par l'IA.",
+                "summary": "Historique des d\u00e9ploiements d'un projet",
+                "tags": [
+                    "D\u00e9ploiements"
+                ],
+                "parameters": [
+                    {
+                        "name": "projet",
+                        "in": "path",
+                        "required": true,
+                        "description": "Nom du projet (ex. mon-blog).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `DeploymentResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/DeploymentResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "deployments.store",
+                "description": "Red\u00e9ploie un projet pendant sa p\u00e9riode pay\u00e9e. La r\u00e9ponse est imm\u00e9diate (202) :\nle travail se fait en arri\u00e8re-plan, et \u00ab operation_id \u00bb permet d'en suivre l'avancement\navec GET /api/operations/{id}. Un seul d\u00e9ploiement \u00e0 la fois par projet.",
+                "summary": "Lancer un d\u00e9ploiement",
+                "tags": [
+                    "D\u00e9ploiements"
+                ],
+                "parameters": [
+                    {
+                        "name": "projet",
+                        "in": "path",
+                        "required": true,
+                        "description": "Nom du projet (ex. mon-blog).",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreDeploymentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "`DeploymentResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/DeploymentResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `projet_non_deployable` \u2014 Le projet n'est ni en ligne ni en \u00e9chec (non pay\u00e9, arr\u00eat\u00e9, en cr\u00e9ation ou en suppression).\n- `periode_expiree` \u2014 La p\u00e9riode pay\u00e9e du projet est termin\u00e9e.\n- `deploiement_en_cours` \u2014 Un d\u00e9ploiement du projet n'est pas termin\u00e9 ; \u00ab details \u00bb donne son identifiant.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/operations/{id}": {
+            "get": {
+                "operationId": "operations.show",
+                "description": "Avancement d'un d\u00e9ploiement, d'une cr\u00e9ation ou d'une suppression : statut, \u00e9tape en cours,\npourcentage et erreur \u00e9ventuelle. \u00c0 rappeler jusqu'\u00e0 ce que le statut soit \u00ab reussie \u00bb ou \u00ab echouee \u00bb.",
+                "summary": "Suivre une op\u00e9ration longue",
+                "tags": [
+                    "D\u00e9ploiements"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de l'op\u00e9ration, re\u00e7u dans \u00ab operation_id \u00bb.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`OperationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/OperationResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -599,6 +1139,104 @@
                     "cree_le"
                 ],
                 "title": "AccessTokenResource"
+            },
+            "ActorType": {
+                "type": "string",
+                "description": "Qui a fait l'action ? Sert au journal d'audit et \u00e0 l'historique des d\u00e9ploiements.\n| |\n|---|\n| `humain` <br/> Un humain, depuis le back-office. |\n| `ia` <br/> L'IA, avec un jeton \u00ab agent IA \u00bb (serveur MCP). |\n| `systeme` <br/> La plateforme elle-m\u00eame (t\u00e2che planifi\u00e9e, webhook de paiement\u2026). |",
+                "enum": [
+                    "humain",
+                    "ia",
+                    "systeme"
+                ],
+                "title": "ActorType"
+            },
+            "DeploymentResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "statut": {
+                        "$ref": "#/components/schemas/DeploymentStatus"
+                    },
+                    "acteur": {
+                        "description": "Qui a demand\u00e9 ce d\u00e9ploiement : \u00ab humain \u00bb, \u00ab ia \u00bb ou \u00ab systeme \u00bb.\n| |\n|---|\n| `humain` <br/> Un humain, depuis le back-office. |\n| `ia` <br/> L'IA, avec un jeton \u00ab agent IA \u00bb (serveur MCP). |\n| `systeme` <br/> La plateforme elle-m\u00eame (t\u00e2che planifi\u00e9e, webhook de paiement\u2026). |",
+                        "$ref": "#/components/schemas/ActorType"
+                    },
+                    "branche": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "commit": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "operation_id": {
+                        "type": "string",
+                        "description": "Identifiant \u00e0 passer \u00e0 GET /api/operations/{id} pour suivre l'avancement."
+                    },
+                    "raison_echec": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "demarre_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "termine_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "duree_secondes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Dur\u00e9e en secondes, connue une fois le d\u00e9ploiement termin\u00e9."
+                    },
+                    "cree_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "statut",
+                    "acteur",
+                    "branche",
+                    "commit",
+                    "operation_id",
+                    "raison_echec",
+                    "demarre_le",
+                    "termine_le",
+                    "duree_secondes",
+                    "cree_le"
+                ],
+                "title": "DeploymentResource"
+            },
+            "DeploymentStatus": {
+                "type": "string",
+                "description": "\u00c9tapes d'un d\u00e9ploiement, dans l'ordre o\u00f9 elles se suivent.\n| |\n|---|\n| `en_attente` <br/> Demand\u00e9, en attente du worker. |\n| `construction` <br/> Clonage du d\u00e9p\u00f4t et construction de l'image. |\n| `publication` <br/> Commande \u00ab release \u00bb (ex. migrations) et contr\u00f4le de sant\u00e9. |\n| `en_ligne` <br/> Version en ligne. |\n| `echec` <br/> \u00c9chec : l'ancienne version reste en ligne. |",
+                "enum": [
+                    "en_attente",
+                    "construction",
+                    "publication",
+                    "en_ligne",
+                    "echec"
+                ],
+                "title": "DeploymentStatus"
             },
             "Erreur": {
                 "type": "object",
@@ -712,6 +1350,262 @@
                 ],
                 "title": "LoginRequest"
             },
+            "OperationResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/OperationType"
+                    },
+                    "statut": {
+                        "$ref": "#/components/schemas/OperationStatus"
+                    },
+                    "etape": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "\u00c9tape en cours, lisible par un humain."
+                    },
+                    "progression": {
+                        "type": "integer",
+                        "description": "Avancement de 0 \u00e0 100."
+                    },
+                    "erreur": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Rempli seulement si l'op\u00e9ration a \u00e9chou\u00e9.",
+                        "properties": {
+                            "code": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "message": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "code",
+                            "message"
+                        ]
+                    },
+                    "projet_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "deploiement_id": {
+                        "type": "string"
+                    },
+                    "demarre_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "termine_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "cree_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "statut",
+                    "etape",
+                    "progression",
+                    "erreur",
+                    "projet_id",
+                    "deploiement_id",
+                    "demarre_le",
+                    "termine_le",
+                    "cree_le"
+                ],
+                "title": "OperationResource"
+            },
+            "OperationStatus": {
+                "type": "string",
+                "description": "Avancement d'une op\u00e9ration longue.\n| |\n|---|\n| `en_attente` <br/> Dans la file d'attente, pas encore commenc\u00e9e. |\n| `en_cours` <br/>  |\n| `reussie` <br/>  |\n| `echouee` <br/>  |",
+                "enum": [
+                    "en_attente",
+                    "en_cours",
+                    "reussie",
+                    "echouee"
+                ],
+                "title": "OperationStatus"
+            },
+            "OperationType": {
+                "type": "string",
+                "description": "Nature d'une op\u00e9ration longue, suivie par GET /api/operations/{id}.\n",
+                "enum": [
+                    "deploiement",
+                    "suppression_projet",
+                    "creation_base",
+                    "suppression_base"
+                ],
+                "title": "OperationType"
+            },
+            "ProjectDatabaseResource": {
+                "type": "object",
+                "properties": {
+                    "nom": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string"
+                    },
+                    "taille": {
+                        "$ref": "#/components/schemas/ResourceSize"
+                    }
+                },
+                "required": [
+                    "nom",
+                    "type",
+                    "version",
+                    "taille"
+                ],
+                "title": "ProjectDatabaseResource"
+            },
+            "ProjectResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "statut": {
+                        "$ref": "#/components/schemas/ProjectStatus"
+                    },
+                    "url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Adresse principale : celle du premier service web en ligne."
+                    },
+                    "depot": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "branche": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "echeance": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Fin de la p\u00e9riode pay\u00e9e."
+                    },
+                    "services": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectServiceResource"
+                        }
+                    },
+                    "bases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectDatabaseResource"
+                        }
+                    },
+                    "cree_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "nom",
+                    "statut",
+                    "url",
+                    "depot",
+                    "branche",
+                    "echeance",
+                    "services",
+                    "bases",
+                    "cree_le"
+                ],
+                "title": "ProjectResource"
+            },
+            "ProjectServiceResource": {
+                "type": "object",
+                "properties": {
+                    "nom": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/ServiceType"
+                    },
+                    "framework": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "taille": {
+                        "$ref": "#/components/schemas/ResourceSize"
+                    },
+                    "url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Adresse publique en HTTPS. Vide pour un worker ou tant que le service n'est pas en ligne."
+                    }
+                },
+                "required": [
+                    "nom",
+                    "type",
+                    "framework",
+                    "taille",
+                    "url"
+                ],
+                "title": "ProjectServiceResource"
+            },
+            "ProjectStatus": {
+                "type": "string",
+                "description": "\u00c9tat d'un projet. Les valeurs sont celles renvoy\u00e9es par l'API (champ \u00ab statut \u00bb).\n| |\n|---|\n| `en_attente_paiement` <br/> Cr\u00e9\u00e9, mais la commande n'est pas encore pay\u00e9e. |\n| `provisionnement` <br/> Pay\u00e9 : les ressources sont en cours de cr\u00e9ation. |\n| `actif` <br/> En ligne. |\n| `echec` <br/> Le dernier provisionnement a \u00e9chou\u00e9. |\n| `arrete` <br/> Arr\u00eat\u00e9 sans effacement (fin de p\u00e9riode pay\u00e9e). |\n| `suppression` <br/> Suppression en cours. |",
+                "enum": [
+                    "en_attente_paiement",
+                    "provisionnement",
+                    "actif",
+                    "echec",
+                    "arrete",
+                    "suppression"
+                ],
+                "title": "ProjectStatus"
+            },
             "RegisterRequest": {
                 "type": "object",
                 "description": "Donn\u00e9es d'inscription d'un d\u00e9veloppeur.",
@@ -750,6 +1644,25 @@
                 ],
                 "title": "RegisterRequest"
             },
+            "ResourceSize": {
+                "type": "string",
+                "description": "Taille d'un service ou d'une base, telle qu'\u00e9crite dans datacloud.yaml. Les ressources exactes (processeur, m\u00e9moire) et le prix viennent du catalogue.\n",
+                "enum": [
+                    "petite",
+                    "moyenne",
+                    "grande"
+                ],
+                "title": "ResourceSize"
+            },
+            "ServiceType": {
+                "type": "string",
+                "description": "Type de service, tel que d\u00e9fini dans datacloud.yaml.\n| |\n|---|\n| `web` <br/> Re\u00e7oit du trafic HTTP et poss\u00e8de une adresse publique. |\n| `worker` <br/> T\u00e2che de fond (file d'attente, planificateur), sans adresse publique. |",
+                "enum": [
+                    "web",
+                    "worker"
+                ],
+                "title": "ServiceType"
+            },
             "StoreAgentTokenRequest": {
                 "type": "object",
                 "description": "Donn\u00e9es de cr\u00e9ation d'un jeton d'agent IA.",
@@ -782,6 +1695,30 @@
                     "nom"
                 ],
                 "title": "StoreAgentTokenRequest"
+            },
+            "StoreDeploymentRequest": {
+                "type": "object",
+                "description": "Donn\u00e9es d'une demande de d\u00e9ploiement.",
+                "properties": {
+                    "branche": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Branche \u00e0 d\u00e9ployer. Absente = la branche enregistr\u00e9e sur le projet.",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._\\/-]*$",
+                        "maxLength": 255
+                    },
+                    "commit": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Commit pr\u00e9cis \u00e0 d\u00e9ployer (7 \u00e0 40 caract\u00e8res hexad\u00e9cimaux). Absent = le dernier de la branche.",
+                        "pattern": "^[0-9a-f]{7,40}$"
+                    }
+                },
+                "title": "StoreDeploymentRequest"
             },
             "TokenKind": {
                 "type": "string",
