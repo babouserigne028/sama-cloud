@@ -150,7 +150,7 @@ Il est construit partie par partie, dans cet ordre (chaque partie s'appuie sur l
 |---|---|---|
 | C1 | Profils publics, technologies, recherche de profils | Fait |
 | C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | Fait |
-| C3 | Étoiles, points et classement par pays | En partie : les points des réponses sont faits ; restent le classement par pays et les étoiles sur les projets, templates et pannes |
+| C3 | Points de réputation, classement par pays, anti-triche | Fait pour les questions-réponses. Les étoiles sur les projets, templates et pannes arriveront avec ces contenus (C4 et sprint 4) |
 | C4 | Vitrine de projets : dépôt GitHub cloné, fichiers lisibles et modifiables, `.zip`, commentaires | À faire |
 | C5 | Appels à collaboration : publication, candidatures, acceptation, équipe du projet | À faire |
 
@@ -204,9 +204,28 @@ Ce qui est volontairement laissé de côté dans C2 :
 - [ ] **Retour au membre qui a signalé** (son signalement a été retenu ou rejeté) : il n'en est pas informé.
 - [ ] **Signalement d'un profil** ou d'un futur projet de la vitrine : seules les questions et les
   réponses se signalent pour l'instant.
-- [ ] **Anti-triche sur les points** : les comptes de moins de 24 h et les pics anormaux de votes ne sont
-  pas encore surveillés. Quand : partie C3, avec le classement.
+- [x] **Anti-triche, comptes récents** : le vote ou l'acceptation d'un compte de moins de 24 h est
+  enregistré mais ne rapporte pas de points (réglage `COMMUNITY_MIN_ACCOUNT_AGE_HOURS`).
 - [ ] **Nettoyage des vieilles notifications** : elles s'accumulent sans limite. Commande planifiée à prévoir.
+
+Route de la partie C3 : `GET /api/classement` (filtres `pays`, `periode` = `tout` ou `mois`, `par_page`),
+publique. Le rang est celui du classement demandé ; les ex æquo partagent le même rang.
+
+Ce qui est volontairement laissé de côté dans C3 :
+
+- [ ] **Décision pour la démonstration : la règle des 24 heures.** Un membre du jury qui crée un compte et
+  vote aussitôt verra son vote compté, mais sans points pour l'auteur : il peut croire à un bogue.
+  À décider avant la soumission : mettre `COMMUNITY_MIN_ACCOUNT_AGE_HOURS=0` sur la plateforme de
+  démonstration, ou l'expliquer dans l'interface. Les points ne sont pas donnés après coup quand le
+  compte atteint 24 heures.
+- [ ] **Étoiles sur les projets, templates et pannes** (+5), **déploiement d'un template** (+2),
+  **développeur aidé par une panne** (+2), **contenu publié** (+10) : ces contenus n'existent pas encore.
+  Le registre des points (`ReputationLedger`) est prêt à les recevoir.
+- [ ] **Rang affiché sur le profil public** : le profil montre les points, pas encore le rang.
+- [ ] **Alerte aux administrateurs en cas de pic anormal de votes** sur un compte.
+- [ ] **Classement par technologie** : non demandé par le README (il l'était dans l'ancien cahier des charges).
+- [ ] **Performance** : le classement est recalculé à chaque appel. Suffisant pour le concours ; au-delà de
+  quelques milliers de membres, prévoir un cache de quelques minutes.
 
 Points d'attention pour C4 (vitrine) :
 
