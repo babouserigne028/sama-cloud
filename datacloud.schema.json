@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://samacloud.example/schemas/datacloud.schema.json",
+  "$id": "https://samacloud.piitech.dev/schemas/datacloud.schema.json",
   "title": "datacloud.yaml",
   "description": "Configuration de déploiement d'un projet sur SamaCloud (format version 1).",
   "type": "object",
