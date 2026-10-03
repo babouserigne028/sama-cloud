@@ -15,7 +15,8 @@ l'API, pour ne rien perdre de vue. Il est mis à jour à la fin de chaque partie
 | 3 | Authentification Sanctum et jetons IA | Fait |
 | 4 | Spécification OpenAPI publiée | Fait |
 
-**Sprint 1 terminé** (cartes de Moussa : OpenAPI, Sanctum, schéma PostgreSQL).
+**Sprint 1 terminé et vérifié** (cartes de Moussa : OpenAPI, Sanctum, schéma PostgreSQL), avec en plus
+le rôle administrateur, la correction de la limite de débit et 5 routes du sprint 2 faites en avance.
 Prochaine étape : sprint 2 — endpoints projets et déploiements, journal d'audit, quotas par compte.
 
 ## Base de données
@@ -82,8 +83,8 @@ Prochaine étape : sprint 2 — endpoints projets et déploiements, journal d'au
 ## Spécification OpenAPI
 
 - [ ] **Les routes futures ne sont pas dans la spécification.**
-  `openapi.json` est généré à partir du code : il décrit les 7 routes qui existent (authentification
-  et jetons IA), pas les 21 autres prévues dans `outils-mcp.md`. Elles y entreront au fur et à mesure.
+  `openapi.json` est généré à partir du code : il décrit les 12 routes qui existent (les 9 que Babou
+  attend au sprint 2 sont toutes là), pas les 19 autres prévues dans `outils-mcp.md`. Elles y entreront au fur et à mesure.
   Pourquoi : une spécification écrite à la main pour du code qui n'existe pas finit par mentir.
   Conséquence : Thioro et Babou s'appuient sur `outils-mcp.md` pour les routes à venir, et
   régénèrent leur client à chaque sprint.
@@ -95,6 +96,65 @@ Prochaine étape : sprint 2 — endpoints projets et déploiements, journal d'au
   ou la réserver. Recommandation : la laisser publique.
 - [ ] **Vérification en intégration continue** : le test « openapi.json est à jour » échoue si quelqu'un
   modifie l'API sans lancer `composer openapi`. À signaler à Amadou pour sa CI.
+
+## Constats de la vérification du sprint 1 (3 octobre)
+
+- [x] **Rôle administrateur inutilisable.** Corrigé : commande `php artisan samacloud:admin <email>`
+  (et `--retirer`), et contrôle `admin` sur les routes (rôle administrateur + jeton de session).
+  Texte d'origine : Le rôle existe en base, mais il n'y a ni moyen de créer un
+  administrateur, ni protection « réservé aux administrateurs ». La carte « Authentification Sanctum »
+  cite pourtant les rôles client, administrateur et agent IA.
+  À faire : une commande pour créer ou promouvoir un administrateur, et un contrôle de rôle sur les routes.
+  Quand : à finir avant de clore le sprint 1 (petit), ou au plus tard avec la console d'administration.
+- [x] **Limite de débit contournée par les appels sans jeton sur les routes protégées.** Corrigé : la
+  limite est vérifiée avant l'authentification, avec un plafond par adresse IP (300/min) contre
+  les essais de jetons au hasard. Texte d'origine :
+  Laravel vérifie le jeton avant la limite de débit : un appel sans jeton valide est refusé (401)
+  sans être compté. Risque faible (le refus coûte une seule lecture en base), mais à corriger.
+  Quand : revue de sécurité, ou plus tôt.
+- [ ] **PHP 8.3 et PostgreSQL 16 non vérifiés.** Le README de l'équipe annonce ces versions ; le
+  développement s'est fait sous PHP 8.4 et PostgreSQL 17. Le code n'utilise rien de propre à ces
+  versions à ma connaissance, mais aucun test n'a tourné dessous. À vérifier dans la CI d'Amadou.
+- [ ] **CORS désormais faisable** : le domaine est fixé (`samacloud.piitech.dev`).
+- [ ] **Noms réservés** (`www`, `api`, `mcp`, `pay`, `admin`) à refuser pour un projet ou un service :
+  règle ajoutée par Babou dans `datacloud-yaml.md`. Quand : sprint 2 (création de projet).
+- [ ] **Accents dans le JSON** : ils sortent sous forme échappée (`é`). C'est du JSON valide, lu
+  correctement par tous les clients ; seulement moins lisible à l'œil nu.
+
+## Projets et déploiements (routes faites en avance pour Babou)
+
+Faites le 3 octobre, à la clôture du sprint 1 : `GET /api/projets`, `GET /api/projets/{projet}`,
+`GET /api/projets/{projet}/deploiements`, `POST /api/projets/{projet}/deploiements`,
+`GET /api/operations/{id}`. Ce qui n'est PAS encore fait autour de ces routes :
+
+- [ ] **Branchement du moteur.** `POST …/deploiements` enregistre la demande et émet l'événement
+  `App\Application\Deployment\Events\DeploymentRequested`. Rien n'écoute encore cet événement :
+  le déploiement reste « en_attente ». À faire par Souleymane : un écouteur qui lance son job.
+- [ ] **Création d'un projet.** Aucune route ne crée de projet : il naît d'un plan appliqué puis payé
+  (sprint 3). Les tests utilisent des projets créés par les fabriques.
+- [ ] **`Idempotency-Key`** sur `POST …/deploiements`. En attendant, la règle « un seul déploiement à la
+  fois par projet » empêche déjà les doublons (réponse 409 avec l'identifiant du déploiement en cours).
+  Quand : sprint 2, avec la table d'idempotence.
+- [ ] **Journal d'audit** de `POST …/deploiements`. Quand : sprint 2 (carte « Journal d'audit »).
+- [ ] **Quotas par compte.** Quand : sprint 2 (carte « Quotas »).
+- [ ] **État de santé** dans le détail d'un projet (demandé par `etat_projet`). Dépend du moteur. Sprint 3.
+- [ ] **Noms réservés** (`www`, `api`, `mcp`, `pay`, `admin`). À appliquer à la création d'un projet.
+
+## Module « Communauté » du README (non planifié)
+
+Le README de l'équipe décrit un septième module qui n'est dans aucune carte Trello ni dans les
+endpoints de Babou. Moussa fait toute l'API : ces routes et ces tables sont donc à sa charge.
+
+- [ ] **Questions-réponses** : poser une question avec du code, répondre, vote « Utile », réponse acceptée.
+- [ ] **Vitrine de projets** : coller un dépôt GitHub public, clonage, lecture et modification des fichiers
+  dans l'éditeur Monaco, téléchargement `.zip`. Écarter `.env`, binaires, `node_modules` et `vendor`.
+  Le clonage lui-même est une opération longue (worker), à coordonner avec Souleymane.
+- [ ] **Appels à collaboration** : publication, candidatures, acceptation, équipe du projet.
+- [ ] **Étoiles** sur réponses, projets, templates et pannes ; **classement** par pays
+  (étoile +5, réponse acceptée +15, déploiement d'un template +2, développeur aidé +2, contenu publié +10).
+- [ ] **Profils publics**.
+  À décider avec l'équipe : à quel sprint, et ce qui est indispensable pour la soumission. C'est le cœur
+  du sujet du concours (« plateforme d'échange »), qui pèse 25 % de la note : ne pas le garder pour la fin.
 
 ## Qualité et outillage
 
@@ -114,6 +174,9 @@ Prochaine étape : sprint 2 — endpoints projets et déploiements, journal d'au
 - [ ] Babou : `/api/moi` renvoie `data.compte` et `data.jeton` (`type`, `capacites`, `plafond_mensuel_fcfa`,
   `expire_le`). Un jeton sans la bonne capacité reçoit 403 `capacite_manquante` avec
   `details.capacites_requises`. Les jetons IA font 56 caractères et commencent par `sc_live_` ou `sc_test_`.
+- [ ] Équipe : le README prévoit la spécification OpenAPI dans `docs/` à la racine ; elle est dans
+  `api/openapi.json` (à côté du code qui la génère et du test qui la vérifie). À trancher : la laisser
+  là et mettre un lien dans le README, ou la copier.
 - [ ] Thioro : générer le client TypeScript à partir de `api/openapi.json` (OpenAPI 3.1). Les noms
   d'opération sont `auth.login`, `auth.register`, `auth.me`, `agent-tokens.store`…
 - [ ] Thioro : routes d'authentification à brancher — `POST /api/inscription`, `POST /api/connexion`,
