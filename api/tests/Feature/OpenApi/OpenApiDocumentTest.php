@@ -22,7 +22,12 @@ function generatedOpenApiDocument(): array
 {
     static $document = null;
 
-    return $document ??= app(Generator::class)(Scramble::getGeneratorConfig(Scramble::DEFAULT_API));
+    // Aller-retour par JSON : le document a exactement la forme qu'il aura une fois écrit dans le fichier.
+    return $document ??= json_decode(
+        (string) json_encode(app(Generator::class)(Scramble::getGeneratorConfig(Scramble::DEFAULT_API))),
+        true,
+        flags: JSON_THROW_ON_ERROR,
+    );
 }
 
 /**
@@ -127,6 +132,7 @@ test('seules l\'inscription, la connexion et la lecture de la communauté sont p
         'GET /profils/{pseudo}',
         'GET /questions',
         'GET /questions/{id}',
+        'GET /questions/{id}/reponses',
     ]);
 });
 

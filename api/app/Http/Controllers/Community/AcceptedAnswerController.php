@@ -23,7 +23,8 @@ final class AcceptedAnswerController extends Controller
      * Accepter une réponse.
      *
      * Réservé à l'auteur de la question. Une seule réponse acceptée par question :
-     * en choisir une autre remplace la précédente.
+     * en choisir une autre remplace la précédente. L'auteur de la réponse gagne 15 points
+     * et reçoit une notification (sauf si c'est l'auteur de la question lui-même).
      *
      * @param  string  $id  Identifiant de la question.
      */
@@ -46,13 +47,13 @@ final class AcceptedAnswerController extends Controller
      *
      * @param  string  $id  Identifiant de la question.
      */
-    public function destroy(#[CurrentUser] User $user, string $id, GetQuestionDetails $getQuestionDetails): QuestionResource
+    public function destroy(#[CurrentUser] User $user, string $id, AcceptAnswer $acceptAnswer, GetQuestionDetails $getQuestionDetails): QuestionResource
     {
         $question = Question::query()->findOrFail($id);
 
         Gate::authorize('acceptAnswer', $question);
 
-        $question->update(['accepted_answer_id' => null]);
+        $acceptAnswer->clear($question);
 
         return new QuestionResource($getQuestionDetails->handle($question->id, $user));
     }

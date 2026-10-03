@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Account\Enums\TokenAbility;
 use App\Domain\Community\UsernameRules;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Auth\AgentTokenController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -13,8 +14,10 @@ use App\Http\Controllers\Community\AcceptedAnswerController;
 use App\Http\Controllers\Community\AnswerController;
 use App\Http\Controllers\Community\AnswerVoteController;
 use App\Http\Controllers\Community\MyProfileController;
+use App\Http\Controllers\Community\NotificationController;
 use App\Http\Controllers\Community\ProfileController;
 use App\Http\Controllers\Community\QuestionController;
+use App\Http\Controllers\Community\ReportController;
 use App\Http\Controllers\Community\TechnologyController;
 use App\Http\Controllers\DeploymentController;
 use App\Http\Controllers\OperationController;
@@ -43,6 +46,7 @@ Route::get('profils/{pseudo}', [ProfileController::class, 'show'])
     ->name('profiles.show');
 Route::get('questions', [QuestionController::class, 'index'])->name('questions.index');
 Route::get('questions/{id}', [QuestionController::class, 'show'])->whereUlid('id')->name('questions.show');
+Route::get('questions/{id}/reponses', [AnswerController::class, 'index'])->whereUlid('id')->name('answers.index');
 
 // --- Routes qui exigent un jeton valide et un compte non suspendu ---
 Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($projectName) {
@@ -81,6 +85,22 @@ Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($p
 
         Route::put('reponses/{id}/vote-utile', [AnswerVoteController::class, 'store'])->whereUlid('id')->name('answer-votes.store');
         Route::delete('reponses/{id}/vote-utile', [AnswerVoteController::class, 'destroy'])->whereUlid('id')->name('answer-votes.destroy');
+
+        Route::post('questions/{id}/signalements', [ReportController::class, 'question'])->whereUlid('id')->name('reports.question');
+        Route::post('reponses/{id}/signalements', [ReportController::class, 'answer'])->whereUlid('id')->name('reports.answer');
+    });
+
+    // Notifications du compte (réponse reçue, réponse acceptée) : session du navigateur uniquement.
+    Route::middleware('abilities:'.TokenAbility::CommunityParticipate->value)->group(function () {
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/lues', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+        Route::post('notifications/{id}/lue', [NotificationController::class, 'markAsRead'])->whereUuid('id')->name('notifications.read');
+    });
+
+    // Administration : rôle administrateur et jeton de session obligatoires.
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('signalements', [AdminReportController::class, 'index'])->name('admin.reports.index');
+        Route::post('signalements/{id}/decision', [AdminReportController::class, 'resolve'])->whereUlid('id')->name('admin.reports.resolve');
     });
 
     // Lecture des projets, des déploiements et des opérations (humain ou IA).

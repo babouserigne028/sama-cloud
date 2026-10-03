@@ -40,6 +40,10 @@ final class MyProfileController extends Controller
 
     private function profileOf(User $user): Profile
     {
-        return Profile::query()->whereKey($user->id)->with(['user', 'technologies'])->firstOrFail();
+        return Profile::query()
+            ->whereKey($user->id)
+            ->with(['user', 'technologies'])
+            ->withSum('reputationEvents as points', 'points')
+            ->firstOrFail();
     }
 }

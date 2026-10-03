@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Profil public d'un développeur. Il ne contient aucune donnée sensible :
@@ -52,6 +53,16 @@ class Profile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Points de réputation gagnés par ce développeur.
+     *
+     * @return HasMany<ReputationEvent, $this>
+     */
+    public function reputationEvents(): HasMany
+    {
+        return $this->hasMany(ReputationEvent::class, 'user_id', 'user_id');
     }
 
     /**

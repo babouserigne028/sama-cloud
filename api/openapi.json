@@ -29,6 +29,12 @@
         },
         {
             "name": "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+        },
+        {
+            "name": "Communaut\u00e9 \u2014 notifications"
+        },
+        {
+            "name": "Administration"
         }
     ],
     "security": [
@@ -1875,7 +1881,7 @@
         "/questions/{id}": {
             "get": {
                 "operationId": "questions.show",
-                "description": "Lecture publique. Avec un jeton, \u00ab vote_par_moi \u00bb indique les r\u00e9ponses pour lesquelles\nle compte a d\u00e9j\u00e0 vot\u00e9 \u00ab Utile \u00bb.",
+                "description": "Lecture publique. Les 20 premi\u00e8res r\u00e9ponses sont jointes ; les suivantes se lisent avec\nGET /api/questions/{id}/reponses. Avec un jeton, \u00ab vote_par_moi \u00bb indique les r\u00e9ponses\npour lesquelles le compte a d\u00e9j\u00e0 vot\u00e9 \u00ab Utile \u00bb.",
                 "summary": "Voir une question et ses r\u00e9ponses",
                 "tags": [
                     "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
@@ -2097,8 +2103,212 @@
             }
         },
         "/questions/{id}/reponses": {
+            "get": {
+                "operationId": "answers.index",
+                "description": "Lecture publique, 20 r\u00e9ponses par page : la r\u00e9ponse accept\u00e9e d'abord, puis les plus utiles,\npuis les plus anciennes. La premi\u00e8re page est d\u00e9j\u00e0 jointe \u00e0 GET /api/questions/{id}.",
+                "summary": "Lister les r\u00e9ponses d'une question",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Num\u00e9ro de page (1 par d\u00e9faut).",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `AnswerResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AnswerResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
             "post": {
                 "operationId": "answers.store",
+                "description": "L'auteur de la question re\u00e7oit une notification.",
                 "summary": "R\u00e9pondre \u00e0 une question",
                 "tags": [
                     "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
@@ -2298,7 +2508,7 @@
             },
             "delete": {
                 "operationId": "answers.destroy",
-                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur, ou \u00e0 un administrateur pour la mod\u00e9ration. Si c'\u00e9tait la r\u00e9ponse accept\u00e9e,\nla question redevient \u00ab non r\u00e9solue \u00bb.",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur, ou \u00e0 un administrateur pour la mod\u00e9ration. Si c'\u00e9tait la r\u00e9ponse accept\u00e9e,\nla question redevient \u00ab non r\u00e9solue \u00bb. Les points qu'elle avait rapport\u00e9s sont repris.",
                 "summary": "Supprimer sa r\u00e9ponse",
                 "tags": [
                     "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
@@ -2364,7 +2574,7 @@
         "/questions/{id}/reponse-acceptee": {
             "put": {
                 "operationId": "accepted-answer.update",
-                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur de la question. Une seule r\u00e9ponse accept\u00e9e par question :\nen choisir une autre remplace la pr\u00e9c\u00e9dente.",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur de la question. Une seule r\u00e9ponse accept\u00e9e par question :\nen choisir une autre remplace la pr\u00e9c\u00e9dente. L'auteur de la r\u00e9ponse gagne 15 points\net re\u00e7oit une notification (sauf si c'est l'auteur de la question lui-m\u00eame).",
                 "summary": "Accepter une r\u00e9ponse",
                 "tags": [
                     "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
@@ -2713,6 +2923,841 @@
                     },
                     "404": {
                         "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{id}/signalements": {
+            "post": {
+                "operationId": "reports.question",
+                "description": "Pr\u00e9vient les administrateurs qu'une question pose probl\u00e8me. Signaler deux fois\nla m\u00eame question ne cr\u00e9e pas de doublon.",
+                "summary": "Signaler une question",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`ReportResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ReportResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.\n- `signalement_de_son_contenu` \u2014 On ne signale pas son propre contenu.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reponses/{id}/signalements": {
+            "post": {
+                "operationId": "reports.answer",
+                "summary": "Signaler une r\u00e9ponse",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la r\u00e9ponse.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`ReportResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ReportResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.\n- `signalement_de_son_contenu` \u2014 On ne signale pas son propre contenu.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications": {
+            "get": {
+                "operationId": "notifications.index",
+                "description": "De la plus r\u00e9cente \u00e0 la plus ancienne, 20 par page. \u00ab meta.non_lues \u00bb donne le nombre\nde notifications pas encore lues (pour la pastille du menu).",
+                "summary": "Lister ses notifications",
+                "tags": [
+                    "Communaut\u00e9 \u2014 notifications"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `NotificationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/NotificationResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                },
+                                                "non_lues": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total",
+                                                "non_lues"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/lues": {
+            "post": {
+                "operationId": "notifications.read-all",
+                "summary": "Marquer toutes ses notifications comme lues",
+                "tags": [
+                    "Communaut\u00e9 \u2014 notifications"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}/lue": {
+            "post": {
+                "operationId": "notifications.read",
+                "summary": "Marquer une notification comme lue",
+                "tags": [
+                    "Communaut\u00e9 \u2014 notifications"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la notification.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/signalements": {
+            "get": {
+                "operationId": "admin.reports.index",
+                "description": "R\u00e9serv\u00e9 aux administrateurs. Par d\u00e9faut, les signalements ouverts, du plus ancien au plus r\u00e9cent.",
+                "summary": "Lister les signalements",
+                "tags": [
+                    "Administration"
+                ],
+                "parameters": [
+                    {
+                        "name": "statut",
+                        "in": "query",
+                        "description": "\u00ab ouvert \u00bb (par d\u00e9faut), \u00ab retenu \u00bb ou \u00ab rejete \u00bb.\n| |\n|---|\n| `ouvert` <br/> En attente de la d\u00e9cision d'un administrateur. |\n| `retenu` <br/> Signalement justifi\u00e9 : le contenu a \u00e9t\u00e9 retir\u00e9. |\n| `rejete` <br/> Signalement non justifi\u00e9 : le contenu reste en ligne. |",
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/ReportStatus"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ReportResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/ReportResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "signale_par"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/signalements/{id}/decision": {
+            "post": {
+                "operationId": "admin.reports.resolve",
+                "description": "R\u00e9serv\u00e9 aux administrateurs. \u00ab retirer \u00bb supprime le contenu et r\u00e8gle tous les signalements\nouverts sur ce contenu ; \u00ab rejeter \u00bb laisse le contenu en ligne.",
+                "summary": "D\u00e9cider d'un signalement",
+                "tags": [
+                    "Administration"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du signalement.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResolveReportRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ReportResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/ReportResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "signale_par"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `signalement_deja_traite` \u2014 Le signalement a d\u00e9j\u00e0 re\u00e7u une d\u00e9cision.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3121,6 +4166,40 @@
                 ],
                 "title": "LoginRequest"
             },
+            "NotificationResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Nature de la notification : \u00ab reponse_recue \u00bb ou \u00ab reponse_acceptee \u00bb."
+                    },
+                    "donnees": {
+                        "type": "array",
+                        "description": "Informations utiles pour l'afficher et ouvrir le bon \u00e9cran (identifiants, titre\u2026).",
+                        "items": {}
+                    },
+                    "lue": {
+                        "type": "boolean"
+                    },
+                    "cree_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "code",
+                    "donnees",
+                    "lue",
+                    "cree_le"
+                ],
+                "title": "NotificationResource"
+            },
             "OperationResource": {
                 "type": "object",
                 "properties": {
@@ -3266,6 +4345,10 @@
                     "disponibilite": {
                         "$ref": "#/components/schemas/Availability"
                     },
+                    "points": {
+                        "type": "integer",
+                        "description": "Points de r\u00e9putation : 15 par r\u00e9ponse accept\u00e9e, 5 par vote \u00ab Utile \u00bb re\u00e7u."
+                    },
                     "technologies": {
                         "type": "array",
                         "items": {
@@ -3314,6 +4397,7 @@
                     "bio",
                     "pays",
                     "disponibilite",
+                    "points",
                     "technologies",
                     "liens",
                     "membre_depuis"
@@ -3499,7 +4583,7 @@
                     },
                     "reponses": {
                         "type": "array",
-                        "description": "La r\u00e9ponse accept\u00e9e en premier, puis les plus utiles, puis les plus anciennes.",
+                        "description": "Les 20 premi\u00e8res : la r\u00e9ponse accept\u00e9e d'abord, puis les plus utiles, puis les plus anciennes.\nAu-del\u00e0 (voir \u00ab nb_reponses \u00bb), lire GET /api/questions/{id}/reponses?page=2.",
                         "items": {
                             "$ref": "#/components/schemas/AnswerResource"
                         }
@@ -3608,6 +4692,125 @@
                     "mot_de_passe_confirmation"
                 ],
                 "title": "RegisterRequest"
+            },
+            "ReportReason": {
+                "type": "string",
+                "description": "Motif d'un signalement.\n",
+                "enum": [
+                    "spam",
+                    "contenu_offensant",
+                    "hors_sujet",
+                    "autre"
+                ],
+                "title": "ReportReason"
+            },
+            "ReportRequest": {
+                "type": "object",
+                "description": "Signalement d'un contenu.",
+                "properties": {
+                    "motif": {
+                        "$ref": "#/components/schemas/ReportReason"
+                    },
+                    "details": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Pr\u00e9cisions facultatives pour l'administrateur ; obligatoires si le motif est \u00ab autre \u00bb.",
+                        "maxLength": 500
+                    }
+                },
+                "required": [
+                    "motif"
+                ],
+                "title": "ReportRequest"
+            },
+            "ReportResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "\u00ab question \u00bb ou \u00ab reponse \u00bb.",
+                        "$ref": "#/components/schemas/ReportableType"
+                    },
+                    "contenu_id": {
+                        "type": "string"
+                    },
+                    "motif": {
+                        "$ref": "#/components/schemas/ReportReason"
+                    },
+                    "details": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "statut": {
+                        "$ref": "#/components/schemas/ReportStatus"
+                    },
+                    "signale_par": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    },
+                    "traite_le": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "contenu_id",
+                    "motif",
+                    "details",
+                    "statut",
+                    "cree_le",
+                    "traite_le"
+                ],
+                "title": "ReportResource"
+            },
+            "ReportStatus": {
+                "type": "string",
+                "description": "\u00c9tat d'un signalement.\n| |\n|---|\n| `ouvert` <br/> En attente de la d\u00e9cision d'un administrateur. |\n| `retenu` <br/> Signalement justifi\u00e9 : le contenu a \u00e9t\u00e9 retir\u00e9. |\n| `rejete` <br/> Signalement non justifi\u00e9 : le contenu reste en ligne. |",
+                "enum": [
+                    "ouvert",
+                    "retenu",
+                    "rejete"
+                ],
+                "title": "ReportStatus"
+            },
+            "ReportableType": {
+                "type": "string",
+                "description": "Types de contenus qu'un membre peut signaler.\n",
+                "enum": [
+                    "question",
+                    "reponse"
+                ],
+                "title": "ReportableType"
+            },
+            "ResolveReportRequest": {
+                "type": "object",
+                "description": "D\u00e9cision d'un administrateur sur un signalement.",
+                "properties": {
+                    "decision": {
+                        "type": "string",
+                        "description": "\u00ab retirer \u00bb = le contenu est supprim\u00e9 ; \u00ab rejeter \u00bb = il reste en ligne.",
+                        "enum": [
+                            "retirer",
+                            "rejeter"
+                        ]
+                    }
+                },
+                "required": [
+                    "decision"
+                ],
+                "title": "ResolveReportRequest"
             },
             "ResourceSize": {
                 "type": "string",

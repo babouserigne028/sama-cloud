@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Community\Actions;
 
+use App\Application\Community\ReputationLedger;
 use App\Models\Answer;
 use App\Models\Question;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
  */
 final class DeleteAnswer
 {
+    public function __construct(private readonly ReputationLedger $reputation) {}
+
     public function handle(Answer $answer): void
     {
         DB::transaction(function () use ($answer): void {
@@ -21,6 +24,9 @@ final class DeleteAnswer
                 ->whereKey($answer->question_id)
                 ->where('accepted_answer_id', $answer->id)
                 ->update(['accepted_answer_id' => null]);
+
+            // Une réponse retirée ne rapporte plus de points à son auteur.
+            $this->reputation->revokeAllForAnswers([$answer->id]);
 
             $answer->delete();
         });

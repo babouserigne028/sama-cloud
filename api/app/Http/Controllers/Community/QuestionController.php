@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Community;
 
 use App\Application\Community\Actions\AskQuestion;
+use App\Application\Community\Actions\DeleteQuestion;
 use App\Application\Community\Actions\UpdateQuestion;
 use App\Application\Community\Queries\GetQuestionDetails;
 use App\Application\Community\Queries\SearchQuestions;
@@ -49,8 +50,9 @@ final class QuestionController extends Controller
     /**
      * Voir une question et ses réponses.
      *
-     * Lecture publique. Avec un jeton, « vote_par_moi » indique les réponses pour lesquelles
-     * le compte a déjà voté « Utile ».
+     * Lecture publique. Les 20 premières réponses sont jointes ; les suivantes se lisent avec
+     * GET /api/questions/{id}/reponses. Avec un jeton, « vote_par_moi » indique les réponses
+     * pour lesquelles le compte a déjà voté « Utile ».
      *
      * @unauthenticated
      *
@@ -106,13 +108,13 @@ final class QuestionController extends Controller
      *
      * @param  string  $id  Identifiant de la question.
      */
-    public function destroy(string $id): Response
+    public function destroy(string $id, DeleteQuestion $deleteQuestion): Response
     {
         $question = Question::query()->findOrFail($id);
 
         Gate::authorize('delete', $question);
 
-        $question->delete();
+        $deleteQuestion->handle($question);
 
         return response()->noContent();
     }

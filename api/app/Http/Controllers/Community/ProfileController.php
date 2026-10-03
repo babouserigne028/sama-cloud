@@ -52,6 +52,7 @@ final class ProfileController extends Controller
             ->where('username', $pseudo)
             ->whereHas('user', fn (Builder $user) => $user->whereNull('suspended_at'))
             ->with(['user', 'technologies'])
+            ->withSum('reputationEvents as points', 'points')
             ->firstOrFail();
 
         return new ProfileResource($profile);

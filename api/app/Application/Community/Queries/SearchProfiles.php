@@ -27,6 +27,7 @@ final class SearchProfiles
     {
         $query = Profile::query()
             ->with(['user', 'technologies'])
+            ->withSum('reputationEvents as points', 'points')
             ->whereHas('user', function (Builder $user) use ($countryCode): void {
                 $user->whereNull('suspended_at');
 

@@ -10,7 +10,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Profil public d'un développeur. Il ne contient jamais l'adresse e-mail.
- * Les relations « user » et « technologies » doivent être chargées à l'avance.
+ * Les relations « user » et « technologies » doivent être chargées à l'avance,
+ * ainsi que le total « points » (withSum).
  *
  * @mixin Profile
  */
@@ -30,6 +31,8 @@ final class ProfileResource extends JsonResource
             // Code pays sur 2 lettres.
             'pays' => $this->user->country_code,
             'disponibilite' => $this->availability,
+            // Points de réputation : 15 par réponse acceptée, 5 par vote « Utile » reçu.
+            'points' => (int) ($this->resource->getAttributes()['points'] ?? 0),
             'technologies' => TechnologyResource::collection($this->technologies),
             'liens' => [
                 'github' => $this->github_url,

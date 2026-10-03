@@ -31,7 +31,8 @@ final class QuestionResource extends JsonResource
             'nb_reponses' => (int) $this->answers_count,
             'resolue' => $this->isResolved(),
             'reponse_acceptee_id' => $this->accepted_answer_id,
-            // La réponse acceptée en premier, puis les plus utiles, puis les plus anciennes.
+            // Les 20 premières : la réponse acceptée d'abord, puis les plus utiles, puis les plus anciennes.
+            // Au-delà (voir « nb_reponses »), lire GET /api/questions/{id}/reponses?page=2.
             'reponses' => AnswerResource::collection($this->answers),
             'cree_le' => $this->created_at->toIso8601String(),
             'modifie_le' => $this->updated_at->toIso8601String(),
