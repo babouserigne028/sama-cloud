@@ -149,7 +149,7 @@ Il est construit partie par partie, dans cet ordre (chaque partie s'appuie sur l
 | Partie | Contenu | État |
 |---|---|---|
 | C1 | Profils publics, technologies, recherche de profils | Fait |
-| C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | À faire |
+| C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | Fait |
 | C3 | Étoiles, points et classement par pays | À faire |
 | C4 | Vitrine de projets : dépôt GitHub cloné, fichiers lisibles et modifiables, `.zip`, commentaires | À faire |
 | C5 | Appels à collaboration : publication, candidatures, acceptation, équipe du projet | À faire |
@@ -171,6 +171,30 @@ Ce qui est volontairement laissé de côté dans C1 :
   ignore la casse mais pas les accents (« traore » ne trouve pas « Traoré »).
 - [ ] **Lancer `php artisan db:seed`** à chaque déploiement de l'API, pour charger les technologies.
   À signaler à Souleymane.
+
+Routes de la partie C2 : `GET /api/questions` (filtres `q`, `technologie`, `statut`, `par_page`) et
+`GET /api/questions/{id}` — publiques ; avec un jeton de session : `POST /api/questions`,
+`PATCH` et `DELETE /api/questions/{id}`, `POST /api/questions/{id}/reponses`, `PATCH` et
+`DELETE /api/reponses/{id}`, `PUT` et `DELETE /api/questions/{id}/reponse-acceptee`,
+`PUT` et `DELETE /api/reponses/{id}/vote-utile`.
+
+Ce qui est volontairement laissé de côté dans C2 :
+
+- [ ] **Affichage du Markdown : à la charge du front.** L'API stocke et renvoie le texte brut. Le front doit
+  le mettre en forme ET le nettoyer (DOMPurify) avant de l'afficher, sinon une question peut contenir
+  du code malveillant (XSS). À dire à Thioro, c'est un point de sécurité.
+- [ ] **Signalement d'un contenu** par les membres. Aujourd'hui, seul un administrateur peut retirer
+  une question ou une réponse. Quand : avec la console d'administration (sprint 4).
+- [ ] **Contenus d'un compte suspendu** : ses questions et réponses restent visibles (son profil, lui,
+  est masqué). À décider : les masquer aussi.
+- [ ] **Notifications** à l'auteur d'une question quand quelqu'un répond. Dépend du module Alertes (Amadou).
+- [ ] **Pagination des réponses** d'une question : elles sont toutes renvoyées d'un coup.
+  Sans importance tant qu'une question a quelques dizaines de réponses.
+- [ ] **Commentaires** sous une réponse, et **historique des modifications** : non demandés par le README.
+- [ ] **Tris supplémentaires** de la liste (sans réponse, les plus actives) et recherche plein texte
+  (`tsvector`) : la recherche actuelle est un simple « contient ce texte ».
+- [ ] **Points de réputation** pour une réponse acceptée (+15) et anti-triche (comptes récents) : partie C3.
+  À trancher en C3 : accepter sa propre réponse est permis, mais ne doit rapporter aucun point.
 
 Points d'attention pour C4 (vitrine) :
 
