@@ -150,7 +150,7 @@ Il est construit partie par partie, dans cet ordre (chaque partie s'appuie sur l
 |---|---|---|
 | C1 | Profils publics, technologies, recherche de profils | Fait |
 | C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | Fait |
-| C3 | Étoiles, points et classement par pays | À faire |
+| C3 | Étoiles, points et classement par pays | En partie : les points des réponses sont faits ; restent le classement par pays et les étoiles sur les projets, templates et pannes |
 | C4 | Vitrine de projets : dépôt GitHub cloné, fichiers lisibles et modifiables, `.zip`, commentaires | À faire |
 | C5 | Appels à collaboration : publication, candidatures, acceptation, équipe du projet | À faire |
 
@@ -183,18 +183,30 @@ Ce qui est volontairement laissé de côté dans C2 :
 - [ ] **Affichage du Markdown : à la charge du front.** L'API stocke et renvoie le texte brut. Le front doit
   le mettre en forme ET le nettoyer (DOMPurify) avant de l'afficher, sinon une question peut contenir
   du code malveillant (XSS). À dire à Thioro, c'est un point de sécurité.
-- [ ] **Signalement d'un contenu** par les membres. Aujourd'hui, seul un administrateur peut retirer
-  une question ou une réponse. Quand : avec la console d'administration (sprint 4).
+- [x] **Signalement d'un contenu** par les membres. Fait : `POST /api/questions/{id}/signalements`,
+  `POST /api/reponses/{id}/signalements` ; côté administrateur `GET /api/admin/signalements` et
+  `POST /api/admin/signalements/{id}/decision` (`retirer` ou `rejeter`).
 - [ ] **Contenus d'un compte suspendu** : ses questions et réponses restent visibles (son profil, lui,
   est masqué). À décider : les masquer aussi.
-- [ ] **Notifications** à l'auteur d'une question quand quelqu'un répond. Dépend du module Alertes (Amadou).
-- [ ] **Pagination des réponses** d'une question : elles sont toutes renvoyées d'un coup.
-  Sans importance tant qu'une question a quelques dizaines de réponses.
+- [x] **Notifications** dans le back-office : l'auteur d'une question est prévenu quand quelqu'un répond,
+  l'auteur d'une réponse quand elle est acceptée. Fait : `GET /api/notifications`,
+  `POST /api/notifications/{id}/lue`, `POST /api/notifications/lues`.
+- [x] **Pagination des réponses** : la question joint ses 20 premières réponses ; les suivantes se lisent
+  avec `GET /api/questions/{id}/reponses?page=2`.
 - [ ] **Commentaires** sous une réponse, et **historique des modifications** : non demandés par le README.
 - [ ] **Tris supplémentaires** de la liste (sans réponse, les plus actives) et recherche plein texte
   (`tsvector`) : la recherche actuelle est un simple « contient ce texte ».
-- [ ] **Points de réputation** pour une réponse acceptée (+15) et anti-triche (comptes récents) : partie C3.
-  À trancher en C3 : accepter sa propre réponse est permis, mais ne doit rapporter aucun point.
+- [x] **Points de réputation** : réponse acceptée +15, vote « Utile » reçu +5, affichés sur le profil
+  (`points`). Accepter sa propre réponse ne rapporte rien ; supprimer un contenu reprend ses points.
+- [ ] **Notifications par e-mail** : seules les notifications du back-office existent. L'envoi d'e-mails
+  dépend du module Alertes d'Amadou (serveur SMTP).
+- [ ] **Autres notifications** : vote « Utile » reçu, décision prise sur un signalement. Non demandées.
+- [ ] **Retour au membre qui a signalé** (son signalement a été retenu ou rejeté) : il n'en est pas informé.
+- [ ] **Signalement d'un profil** ou d'un futur projet de la vitrine : seules les questions et les
+  réponses se signalent pour l'instant.
+- [ ] **Anti-triche sur les points** : les comptes de moins de 24 h et les pics anormaux de votes ne sont
+  pas encore surveillés. Quand : partie C3, avec le classement.
+- [ ] **Nettoyage des vieilles notifications** : elles s'accumulent sans limite. Commande planifiée à prévoir.
 
 Points d'attention pour C4 (vitrine) :
 
