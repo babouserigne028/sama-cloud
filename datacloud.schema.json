@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://samacloud.example/schemas/datacloud.schema.json",
+  "title": "datacloud.yaml",
+  "description": "Configuration de déploiement d'un projet sur SamaCloud (format version 1).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "services"],
+  "properties": {
+    "version": {
+      "description": "Version du format.",
+      "const": 1
+    },
+    "nom": {
+      "description": "Nom du projet, utilisé pour le sous-domaine. Défaut : nom du dépôt.",
+      "$ref": "#/$defs/slug"
+    },
+    "services": {
+      "description": "Services du projet (1 à 5).",
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 5,
+      "propertyNames": { "$ref": "#/$defs/slug" },
+      "additionalProperties": { "$ref": "#/$defs/service" }
+    },
+    "bases": {
+      "description": "Bases de données du projet (0 à 2).",
+      "type": "object",
+      "maxProperties": 2,
+      "propertyNames": { "$ref": "#/$defs/slug" },
+      "additionalProperties": { "$ref": "#/$defs/base" }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,28}[a-z0-9]$",
+      "description": "Minuscules, chiffres et tirets ; 3 à 30 caractères ; commence par une lettre."
+    },
+    "cheminRelatif": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "not": { "pattern": "(^/)|(^|/)\\.\\.(/|$)" },
+      "description": "Chemin relatif à la racine du dépôt, sans « .. »."
+    },
+    "commande": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": ["web", "worker"],
+          "default": "web",
+          "description": "web : trafic HTTP et sous-domaine. worker : tâche de fond sans URL."
+        },
+        "framework": {
+          "enum": ["laravel", "node", "static", "django", "fastapi", "flask", "symfony", "php"],
+          "description": "Framework du service. Obligatoire sauf si « dockerfile » est fourni."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+){0,2}$",
+          "description": "Version du langage (PHP, Node, Python…), entre guillemets."
+        },
+        "taille": {
+          "enum": ["petite", "moyenne", "grande"],
+          "default": "petite"
+        },
+        "dossier": {
+          "$ref": "#/$defs/cheminRelatif",
+          "default": "."
+        },
+        "dockerfile": {
+          "$ref": "#/$defs/cheminRelatif",
+          "description": "Dockerfile à utiliser tel quel ; « build » est alors ignoré."
+        },
+        "build": { "$ref": "#/$defs/commande" },
+        "release": {
+          "$ref": "#/$defs/commande",
+          "description": "Exécutée une fois par déploiement, avant la mise en ligne (ex. migrations)."
+        },
+        "demarrage": { "$ref": "#/$defs/commande" },
+        "port": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "sortie": {
+          "$ref": "#/$defs/cheminRelatif",
+          "description": "Framework « static » uniquement : dossier produit par le build et publié."
+        },
+        "sante": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "chemin": {
+              "type": "string",
+              "pattern": "^/",
+              "maxLength": 200,
+              "default": "/"
+            },
+            "delai": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 300,
+              "default": 60
+            }
+          }
+        },
+        "bases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/slug" }
+        },
+        "variables": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$"
+          },
+          "additionalProperties": { "$ref": "#/$defs/variable" }
+        }
+      },
+      "anyOf": [
+        { "required": ["framework"] },
+        { "required": ["dockerfile"] }
+      ],
+      "allOf": [
+        {
+          "if": { "required": ["type"], "properties": { "type": { "const": "worker" } } },
+          "then": {
+            "properties": { "port": false, "sante": false, "sortie": false }
+          }
+        },
+        {
+          "if": { "required": ["sortie"] },
+          "then": { "required": ["framework"], "properties": { "framework": { "const": "static" } } }
+        }
+      ]
+    },
+    "variable": {
+      "oneOf": [
+        {
+          "description": "Valeur publique, non sensible.",
+          "type": ["string", "number", "boolean"]
+        },
+        {
+          "description": "Secret saisi par le client, stocké chiffré.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["secret"],
+          "properties": {
+            "secret": { "const": true },
+            "description": { "type": "string", "maxLength": 200 }
+          }
+        },
+        {
+          "description": "Secret généré par l'API au premier déploiement.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["generer"],
+          "properties": {
+            "generer": { "enum": ["laravel-app-key", "hex32", "motdepasse"] },
+            "description": { "type": "string", "maxLength": 200 }
+          }
+        }
+      ]
+    },
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "postgresql" },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "default": "16"
+        },
+        "taille": {
+          "enum": ["petite", "moyenne"],
+          "default": "petite"
+        }
+      }
+    }
+  }
+}
