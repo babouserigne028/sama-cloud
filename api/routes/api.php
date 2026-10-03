@@ -9,8 +9,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Community\AcceptedAnswerController;
+use App\Http\Controllers\Community\AnswerController;
+use App\Http\Controllers\Community\AnswerVoteController;
 use App\Http\Controllers\Community\MyProfileController;
 use App\Http\Controllers\Community\ProfileController;
+use App\Http\Controllers\Community\QuestionController;
 use App\Http\Controllers\Community\TechnologyController;
 use App\Http\Controllers\DeploymentController;
 use App\Http\Controllers\OperationController;
@@ -37,6 +41,8 @@ Route::get('profils', [ProfileController::class, 'index'])->name('profiles.index
 Route::get('profils/{pseudo}', [ProfileController::class, 'show'])
     ->where('pseudo', trim(UsernameRules::PATTERN, '/^$'))
     ->name('profiles.show');
+Route::get('questions', [QuestionController::class, 'index'])->name('questions.index');
+Route::get('questions/{id}', [QuestionController::class, 'show'])->whereUlid('id')->name('questions.show');
 
 // --- Routes qui exigent un jeton valide et un compte non suspendu ---
 Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($projectName) {
@@ -57,6 +63,24 @@ Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($p
         Route::delete('jetons-ia/{id}', [AgentTokenController::class, 'destroy'])
             ->whereNumber('id')
             ->name('agent-tokens.destroy');
+    });
+
+    // Participation à la communauté : réservée à la session du navigateur (un humain),
+    // avec une limite de publications par minute contre le spam.
+    Route::middleware(['abilities:'.TokenAbility::CommunityParticipate->value, 'throttle:publication'])->group(function () {
+        Route::post('questions', [QuestionController::class, 'store'])->name('questions.store');
+        Route::patch('questions/{id}', [QuestionController::class, 'update'])->whereUlid('id')->name('questions.update');
+        Route::delete('questions/{id}', [QuestionController::class, 'destroy'])->whereUlid('id')->name('questions.destroy');
+
+        Route::post('questions/{id}/reponses', [AnswerController::class, 'store'])->whereUlid('id')->name('answers.store');
+        Route::patch('reponses/{id}', [AnswerController::class, 'update'])->whereUlid('id')->name('answers.update');
+        Route::delete('reponses/{id}', [AnswerController::class, 'destroy'])->whereUlid('id')->name('answers.destroy');
+
+        Route::put('questions/{id}/reponse-acceptee', [AcceptedAnswerController::class, 'update'])->whereUlid('id')->name('accepted-answer.update');
+        Route::delete('questions/{id}/reponse-acceptee', [AcceptedAnswerController::class, 'destroy'])->whereUlid('id')->name('accepted-answer.destroy');
+
+        Route::put('reponses/{id}/vote-utile', [AnswerVoteController::class, 'store'])->whereUlid('id')->name('answer-votes.store');
+        Route::delete('reponses/{id}/vote-utile', [AnswerVoteController::class, 'destroy'])->whereUlid('id')->name('answer-votes.destroy');
     });
 
     // Lecture des projets, des déploiements et des opérations (humain ou IA).

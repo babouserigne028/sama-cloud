@@ -110,6 +110,16 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        // Publications dans la communauté (questions, réponses, votes) : par compte, contre le spam.
+        RateLimiter::for('publication', function (Request $request): Limit {
+            // La limite de débit passe avant l'authentification : on identifie donc le compte ici,
+            // à partir de son jeton. Sans jeton valide, le compteur est celui de l'adresse IP.
+            $account = $request->user('sanctum')?->getAuthIdentifier();
+
+            return Limit::perMinute(config()->integer('samacloud.community.posts_per_minute'))
+                ->by($account !== null ? 'publication:compte:'.$account : 'publication:ip:'.$request->ip());
+        });
+
         // Connexion et inscription : très peu d'essais par minute pour une même adresse e-mail
         // depuis une même adresse IP, afin de bloquer la recherche de mots de passe.
         RateLimiter::for('auth', function (Request $request): Limit {

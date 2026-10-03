@@ -125,6 +125,8 @@ test('seules l\'inscription, la connexion et la lecture de la communauté sont p
         'GET /technologies',
         'GET /profils',
         'GET /profils/{pseudo}',
+        'GET /questions',
+        'GET /questions/{id}',
     ]);
 });
 

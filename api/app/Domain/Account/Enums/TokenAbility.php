@@ -15,6 +15,9 @@ enum TokenAbility: string
     case ProjectsDelete = 'projets:supprimer';
     case ExchangePublish = 'echange:publier';
 
+    /** Poser des questions, répondre, voter : réservé à la session du navigateur (un humain). */
+    case CommunityParticipate = 'communaute:participer';
+
     /** Modifier son profil public : réservé à la session du navigateur. */
     case ManageProfile = 'profil:modifier';
 
@@ -23,7 +26,8 @@ enum TokenAbility: string
 
     /**
      * Capacités données à un jeton selon son type.
-     * Un jeton d'agent IA ne reçoit jamais la gestion des jetons ni celle du profil.
+     * Un jeton d'agent IA ne reçoit jamais la gestion des jetons, celle du profil,
+     * ni le droit de participer à la communauté (les votes et les étoiles sont des gestes humains).
      *
      * @return list<self>
      */
@@ -38,7 +42,7 @@ enum TokenAbility: string
 
         return match ($kind) {
             TokenKind::Agent => $agentAbilities,
-            TokenKind::Session => [...$agentAbilities, self::ManageProfile, self::ManageTokens],
+            TokenKind::Session => [...$agentAbilities, self::CommunityParticipate, self::ManageProfile, self::ManageTokens],
         };
     }
 }

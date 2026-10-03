@@ -16,6 +16,11 @@ return [
         'requests_per_minute_per_ip' => (int) env('API_REQUESTS_PER_MINUTE_PER_IP', 300),
     ],
 
+    'community' => [
+        // Publications par minute et par compte (questions, réponses, votes), contre le spam.
+        'posts_per_minute' => (int) env('COMMUNITY_POSTS_PER_MINUTE', 20),
+    ],
+
     'auth' => [
         // Essais de connexion ou d'inscription par minute, pour une même adresse e-mail et une même adresse IP.
         'attempts_per_minute' => (int) env('AUTH_ATTEMPTS_PER_MINUTE', 5),

@@ -26,6 +26,9 @@
         },
         {
             "name": "Communaut\u00e9 \u2014 profils"
+        },
+        {
+            "name": "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
         }
     ],
     "security": [
@@ -1564,6 +1567,1172 @@
                     }
                 }
             }
+        },
+        "/questions": {
+            "get": {
+                "operationId": "questions.index",
+                "description": "Recherche publique par texte, technologie et statut, de la plus r\u00e9cente \u00e0 la plus ancienne.",
+                "summary": "Lister les questions",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Texte cherch\u00e9 dans le titre et le contenu.",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 100
+                        }
+                    },
+                    {
+                        "name": "technologie",
+                        "in": "query",
+                        "description": "Slug d'une technologie (ex. laravel).",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 40
+                        }
+                    },
+                    {
+                        "name": "statut",
+                        "in": "query",
+                        "description": "\u00ab resolue \u00bb = une r\u00e9ponse a \u00e9t\u00e9 accept\u00e9e ; \u00ab non_resolue \u00bb = pas encore.",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "resolue",
+                                "non_resolue",
+                                null
+                            ]
+                        }
+                    },
+                    {
+                        "name": "par_page",
+                        "in": "query",
+                        "description": "Nombre de questions par page (20 par d\u00e9faut, 50 au plus).",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `QuestionSummaryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/QuestionSummaryResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "post": {
+                "operationId": "questions.store",
+                "summary": "Poser une question",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreQuestionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`QuestionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/QuestionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{id}": {
+            "get": {
+                "operationId": "questions.show",
+                "description": "Lecture publique. Avec un jeton, \u00ab vote_par_moi \u00bb indique les r\u00e9ponses pour lesquelles\nle compte a d\u00e9j\u00e0 vot\u00e9 \u00ab Utile \u00bb.",
+                "summary": "Voir une question et ses r\u00e9ponses",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`QuestionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/QuestionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "patch": {
+                "operationId": "questions.update",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur. Seuls les champs envoy\u00e9s sont modifi\u00e9s.",
+                "summary": "Modifier sa question",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateQuestionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`QuestionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/QuestionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "questions.destroy",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur, ou \u00e0 un administrateur pour la mod\u00e9ration. La question et ses r\u00e9ponses\nne sont plus visibles.",
+                "summary": "Supprimer sa question",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{id}/reponses": {
+            "post": {
+                "operationId": "answers.store",
+                "summary": "R\u00e9pondre \u00e0 une question",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnswerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`AnswerResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AnswerResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reponses/{id}": {
+            "patch": {
+                "operationId": "answers.update",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur de la r\u00e9ponse.",
+                "summary": "Modifier sa r\u00e9ponse",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la r\u00e9ponse.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnswerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`AnswerResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AnswerResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "answers.destroy",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur, ou \u00e0 un administrateur pour la mod\u00e9ration. Si c'\u00e9tait la r\u00e9ponse accept\u00e9e,\nla question redevient \u00ab non r\u00e9solue \u00bb.",
+                "summary": "Supprimer sa r\u00e9ponse",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la r\u00e9ponse.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{id}/reponse-acceptee": {
+            "put": {
+                "operationId": "accepted-answer.update",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur de la question. Une seule r\u00e9ponse accept\u00e9e par question :\nen choisir une autre remplace la pr\u00e9c\u00e9dente.",
+                "summary": "Accepter une r\u00e9ponse",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AcceptAnswerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`QuestionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/QuestionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.\n- `reponse_hors_question` \u2014 La r\u00e9ponse n'appartient pas \u00e0 cette question, ou a \u00e9t\u00e9 supprim\u00e9e.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "accepted-answer.destroy",
+                "description": "R\u00e9serv\u00e9 \u00e0 l'auteur de la question, qui redevient \u00ab non r\u00e9solue \u00bb.",
+                "summary": "Retirer la r\u00e9ponse accept\u00e9e",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la question.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`QuestionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/QuestionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reponses/{id}/vote-utile": {
+            "put": {
+                "operationId": "answer-votes.store",
+                "description": "Un seul vote par compte et par r\u00e9ponse : voter deux fois ne change rien.\nUn jeton d'agent IA ne peut pas voter.",
+                "summary": "Voter \u00ab Utile \u00bb pour une r\u00e9ponse",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la r\u00e9ponse.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "reponse_id": {
+                                                    "type": "string"
+                                                },
+                                                "nb_utile": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                },
+                                                "vote_par_moi": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "reponse_id",
+                                                "nb_utile",
+                                                "vote_par_moi"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.\n- `vote_sur_sa_reponse` \u2014 On ne vote pas pour sa propre r\u00e9ponse.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "answer-votes.destroy",
+                "summary": "Retirer son vote \u00ab Utile \u00bb",
+                "tags": [
+                    "Communaut\u00e9 \u2014 questions-r\u00e9ponses"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant de la r\u00e9ponse.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "reponse_id": {
+                                                    "type": "string"
+                                                },
+                                                "nb_utile": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                },
+                                                "vote_par_moi": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "reponse_id",
+                                                "nb_utile",
+                                                "vote_par_moi"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1575,6 +2744,20 @@
             }
         },
         "schemas": {
+            "AcceptAnswerRequest": {
+                "type": "object",
+                "description": "Choix de la r\u00e9ponse accept\u00e9e.",
+                "properties": {
+                    "reponse_id": {
+                        "type": "string",
+                        "description": "Identifiant d'une r\u00e9ponse de cette question."
+                    }
+                },
+                "required": [
+                    "reponse_id"
+                ],
+                "title": "AcceptAnswerRequest"
+            },
             "AccessTokenResource": {
                 "type": "object",
                 "properties": {
@@ -1640,6 +2823,93 @@
                     "systeme"
                 ],
                 "title": "ActorType"
+            },
+            "AnswerRequest": {
+                "type": "object",
+                "description": "Contenu d'une r\u00e9ponse (cr\u00e9ation ou modification).",
+                "properties": {
+                    "contenu": {
+                        "type": "string",
+                        "description": "Markdown, avec blocs de code.",
+                        "minLength": 10,
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "contenu"
+                ],
+                "title": "AnswerRequest"
+            },
+            "AnswerResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "contenu": {
+                        "type": "string",
+                        "description": "Markdown brut : c'est \u00e0 l'affichage de le mettre en forme et de le nettoyer."
+                    },
+                    "auteur": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "nb_utile": {
+                        "type": "integer",
+                        "description": "Nombre de votes \u00ab Utile \u00bb."
+                    },
+                    "acceptee": {
+                        "type": "boolean",
+                        "description": "Vrai si l'auteur de la question a accept\u00e9 cette r\u00e9ponse."
+                    },
+                    "vote_par_moi": {
+                        "type": "boolean",
+                        "description": "Vrai si le compte connect\u00e9 a vot\u00e9 \u00ab Utile \u00bb. Toujours faux sans jeton."
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    },
+                    "modifie_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "contenu",
+                    "auteur",
+                    "nb_utile",
+                    "acceptee",
+                    "vote_par_moi",
+                    "cree_le",
+                    "modifie_le"
+                ],
+                "title": "AnswerResource"
+            },
+            "AuthorResource": {
+                "type": "object",
+                "properties": {
+                    "pseudo": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "\u00c0 utiliser avec GET /api/profils/{pseudo}."
+                    },
+                    "nom": {
+                        "type": "string"
+                    },
+                    "pays": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "pseudo",
+                    "nom",
+                    "pays"
+                ],
+                "title": "AuthorResource"
             },
             "Availability": {
                 "type": "string",
@@ -2193,6 +3463,114 @@
                 ],
                 "title": "ProjectStatus"
             },
+            "QuestionResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "titre": {
+                        "type": "string"
+                    },
+                    "contenu": {
+                        "type": "string",
+                        "description": "Markdown brut : c'est \u00e0 l'affichage de le mettre en forme et de le nettoyer."
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TechnologyResource"
+                        }
+                    },
+                    "auteur": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "nb_reponses": {
+                        "type": "integer"
+                    },
+                    "resolue": {
+                        "type": "boolean"
+                    },
+                    "reponse_acceptee_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "reponses": {
+                        "type": "array",
+                        "description": "La r\u00e9ponse accept\u00e9e en premier, puis les plus utiles, puis les plus anciennes.",
+                        "items": {
+                            "$ref": "#/components/schemas/AnswerResource"
+                        }
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    },
+                    "modifie_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "titre",
+                    "contenu",
+                    "technologies",
+                    "auteur",
+                    "nb_reponses",
+                    "resolue",
+                    "reponse_acceptee_id",
+                    "reponses",
+                    "cree_le",
+                    "modifie_le"
+                ],
+                "title": "QuestionResource"
+            },
+            "QuestionSummaryResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "titre": {
+                        "type": "string"
+                    },
+                    "extrait": {
+                        "type": "string",
+                        "description": "D\u00e9but du contenu (200 caract\u00e8res), pour l'aper\u00e7u."
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TechnologyResource"
+                        }
+                    },
+                    "auteur": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "nb_reponses": {
+                        "type": "integer"
+                    },
+                    "resolue": {
+                        "type": "boolean",
+                        "description": "Vrai si l'auteur a accept\u00e9 une r\u00e9ponse."
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "titre",
+                    "extrait",
+                    "technologies",
+                    "auteur",
+                    "nb_reponses",
+                    "resolue",
+                    "cree_le"
+                ],
+                "title": "QuestionSummaryResource"
+            },
             "RegisterRequest": {
                 "type": "object",
                 "description": "Donn\u00e9es d'inscription d'un d\u00e9veloppeur.",
@@ -2307,6 +3685,39 @@
                 },
                 "title": "StoreDeploymentRequest"
             },
+            "StoreQuestionRequest": {
+                "type": "object",
+                "description": "Nouvelle question.",
+                "properties": {
+                    "titre": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 150
+                    },
+                    "contenu": {
+                        "type": "string",
+                        "description": "Markdown, avec blocs de code.",
+                        "minLength": 20,
+                        "maxLength": 20000
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "description": "1 \u00e0 5 technologies (slugs) : c'est ce qui permet de retrouver la question.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 5,
+                        "uniqueItems": true
+                    }
+                },
+                "required": [
+                    "titre",
+                    "contenu",
+                    "technologies"
+                ],
+                "title": "StoreQuestionRequest"
+            },
             "TechnologyResource": {
                 "type": "object",
                 "properties": {
@@ -2407,6 +3818,33 @@
                     }
                 },
                 "title": "UpdateProfileRequest"
+            },
+            "UpdateQuestionRequest": {
+                "type": "object",
+                "description": "Modification d'une question. Seuls les champs envoy\u00e9s sont modifi\u00e9s.",
+                "properties": {
+                    "titre": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 150
+                    },
+                    "contenu": {
+                        "type": "string",
+                        "minLength": 20,
+                        "maxLength": 20000
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "description": "Liste compl\u00e8te des technologies \u00e0 garder.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 5,
+                        "uniqueItems": true
+                    }
+                },
+                "title": "UpdateQuestionRequest"
             },
             "UserResource": {
                 "type": "object",

@@ -32,6 +32,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_demo
  * @property int $credit_fcfa
  * @property CarbonImmutable|null $suspended_at
+ * @property-read Profile|null $profile
  */
 #[Fillable(['name', 'email', 'password', 'country_code'])]
 #[Hidden(['password', 'remember_token'])]

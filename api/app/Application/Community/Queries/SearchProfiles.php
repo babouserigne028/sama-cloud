@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Community\Queries;
 
+use App\Application\Shared\LikePattern;
 use App\Domain\Community\Enums\Availability;
 use App\Models\Profile;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -35,9 +36,7 @@ final class SearchProfiles
             });
 
         if ($search !== null && $search !== '') {
-            // Les caractères spéciaux de LIKE (% et _) saisis par l'utilisateur sont neutralisés :
-            // chercher « 100% » ne doit pas renvoyer tous les profils.
-            $pattern = '%'.addcslashes($search, '%_\\').'%';
+            $pattern = LikePattern::contains($search);
 
             $query->where(function (Builder $where) use ($pattern): void {
                 $where->whereLike('username', $pattern)
