@@ -140,21 +140,45 @@ Faites le 3 octobre, à la clôture du sprint 1 : `GET /api/projets`, `GET /api/
 - [ ] **État de santé** dans le détail d'un projet (demandé par `etat_projet`). Dépend du moteur. Sprint 3.
 - [ ] **Noms réservés** (`www`, `api`, `mcp`, `pay`, `admin`). À appliquer à la création d'un projet.
 
-## Module « Communauté » du README (non planifié)
+## Module « Communauté » du README
 
 Le README de l'équipe décrit un septième module qui n'est dans aucune carte Trello ni dans les
-endpoints de Babou. Moussa fait toute l'API : ces routes et ces tables sont donc à sa charge.
+endpoints de Babou. Moussa fait toute l'API : ces routes et ces tables sont à sa charge.
+Il est construit partie par partie, dans cet ordre (chaque partie s'appuie sur la précédente) :
 
-- [ ] **Questions-réponses** : poser une question avec du code, répondre, vote « Utile », réponse acceptée.
-- [ ] **Vitrine de projets** : coller un dépôt GitHub public, clonage, lecture et modification des fichiers
-  dans l'éditeur Monaco, téléchargement `.zip`. Écarter `.env`, binaires, `node_modules` et `vendor`.
-  Le clonage lui-même est une opération longue (worker), à coordonner avec Souleymane.
-- [ ] **Appels à collaboration** : publication, candidatures, acceptation, équipe du projet.
-- [ ] **Étoiles** sur réponses, projets, templates et pannes ; **classement** par pays
-  (étoile +5, réponse acceptée +15, déploiement d'un template +2, développeur aidé +2, contenu publié +10).
-- [ ] **Profils publics**.
-  À décider avec l'équipe : à quel sprint, et ce qui est indispensable pour la soumission. C'est le cœur
-  du sujet du concours (« plateforme d'échange »), qui pèse 25 % de la note : ne pas le garder pour la fin.
+| Partie | Contenu | État |
+|---|---|---|
+| C1 | Profils publics, technologies, recherche de profils | Fait |
+| C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | À faire |
+| C3 | Étoiles, points et classement par pays | À faire |
+| C4 | Vitrine de projets : dépôt GitHub cloné, fichiers lisibles et modifiables, `.zip`, commentaires | À faire |
+| C5 | Appels à collaboration : publication, candidatures, acceptation, équipe du projet | À faire |
+
+Routes de la partie C1 : `GET /api/technologies`, `GET /api/profils` (filtres `q`, `pays`,
+`technologie`, `disponibilite`, `par_page`), `GET /api/profils/{pseudo}` — toutes publiques ;
+`GET /api/moi/profil` et `PATCH /api/moi/profil` — avec jeton.
+
+Ce qui est volontairement laissé de côté dans C1 :
+
+- [ ] **Photo de profil (avatar).** Pourquoi reporté : demande un stockage de fichiers, à décider avec
+  Souleymane (volume du serveur ou stockage objet Datacloud).
+- [ ] **Compteurs sur le profil** (étoiles, rang, projets, réponses acceptées) : ils arrivent avec C2 à C4.
+- [ ] **Tri de la recherche par réputation** : aujourd'hui du plus récent au plus ancien ; par points après C3.
+- [ ] **Niveau par compétence** (débutant, confirmé…) : non demandé par le README.
+- [ ] **Ajout de technologies par un administrateur** : la liste de départ (50 technologies) est dans
+  `TechnologySeeder` ; l'ajout par la console d'administration viendra avec le sprint 4.
+- [ ] **Recherche tolérante aux accents et aux fautes** (`unaccent`, `pg_trgm`) : la recherche actuelle
+  ignore la casse mais pas les accents (« traore » ne trouve pas « Traoré »).
+- [ ] **Lancer `php artisan db:seed`** à chaque déploiement de l'API, pour charger les technologies.
+  À signaler à Souleymane.
+
+Points d'attention pour C4 (vitrine) :
+
+- Le clonage d'un dépôt est une opération longue faite par le worker : à coordonner avec Souleymane.
+- Écarter `.env`, binaires, `node_modules` et `vendor` ; limiter la taille ; ne jamais exécuter le code.
+
+Le sujet du concours est « la plateforme d'échange » et la pertinence pèse 25 % de la note :
+ce module ne doit pas être gardé pour la fin.
 
 ## Qualité et outillage
 
