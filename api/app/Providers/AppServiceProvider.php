@@ -89,15 +89,25 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureRateLimiting(): void
     {
-        // Toute l'API : un compteur par jeton ; à défaut, par adresse IP.
-        RateLimiter::for('api', function (Request $request): Limit {
-            $token = $request->user()?->currentAccessToken();
+        // Toute l'API. Cette limite est vérifiée AVANT l'authentification (voir bootstrap/app.php),
+        // pour que les appels avec un jeton faux ou absent soient comptés eux aussi.
+        RateLimiter::for('api', function (Request $request): array {
+            $perMinute = config()->integer('samacloud.api.requests_per_minute');
+            $bearerToken = $request->bearerToken();
 
-            $key = $token instanceof PersonalAccessToken
-                ? 'jeton:'.$token->getKey()
-                : 'ip:'.$request->ip();
+            // Sans jeton : un compteur par adresse IP.
+            if ($bearerToken === null) {
+                return [Limit::perMinute($perMinute)->by('ip:'.$request->ip())];
+            }
 
-            return Limit::perMinute(config()->integer('samacloud.api.requests_per_minute'))->by($key);
+            return [
+                // Plafond large par adresse IP : bloque celui qui essaie des jetons au hasard.
+                Limit::perMinute(config()->integer('samacloud.api.requests_per_minute_per_ip'))
+                    ->by('ip-avec-jeton:'.$request->ip()),
+                // Un compteur par jeton : l'IA en boucle ne bloque pas l'humain, et inversement.
+                // La clé est l'empreinte du jeton : sa valeur n'est jamais gardée en mémoire cache.
+                Limit::perMinute($perMinute)->by('jeton:'.hash('sha256', $bearerToken)),
+            ];
         });
 
         // Connexion et inscription : très peu d'essais par minute pour une même adresse e-mail

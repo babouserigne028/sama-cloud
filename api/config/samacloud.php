@@ -11,6 +11,9 @@ return [
     'api' => [
         // Nombre maximum de requêtes par minute, par jeton (ou par adresse IP si non connecté).
         'requests_per_minute' => (int) env('API_REQUESTS_PER_MINUTE', 60),
+
+        // Plafond par adresse IP pour l'ensemble des appels faits avec un jeton, valide ou non.
+        'requests_per_minute_per_ip' => (int) env('API_REQUESTS_PER_MINUTE_PER_IP', 300),
     ],
 
     'auth' => [

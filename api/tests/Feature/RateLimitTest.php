@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,4 +55,39 @@ test('chaque adresse IP a son propre compteur', function () {
     $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.2'])
         ->getJson('/api/_test/ok')
         ->assertOk();
+});
+
+test('les appels sans jeton sur une route protégée sont comptés et finissent bloqués', function () {
+    foreach (range(1, 3) as $attempt) {
+        $this->getJson('/api/moi')->assertStatus(401);
+    }
+
+    $this->getJson('/api/moi')->assertStatus(429)->assertJsonPath('code', 'trop_de_requetes');
+});
+
+test('essayer des jetons au hasard est plafonné par adresse IP', function () {
+    config()->set('samacloud.api.requests_per_minute_per_ip', 4);
+
+    foreach (range(1, 4) as $attempt) {
+        forgetAuthenticatedUser();
+        $this->withToken('sc_live_jeton-invente-numero-'.$attempt)->getJson('/api/moi')->assertStatus(401);
+    }
+
+    forgetAuthenticatedUser();
+
+    // Un nouveau jeton inventé ne remet pas le compteur à zéro.
+    $this->withToken('sc_live_encore-un-autre')->getJson('/api/moi')->assertStatus(429);
+});
+
+test('le plafond par adresse IP ne gêne pas un jeton valide dans les limites', function () {
+    config()->set('samacloud.api.requests_per_minute', 3);
+    config()->set('samacloud.api.requests_per_minute_per_ip', 10);
+
+    $token = sessionTokenFor(User::factory()->create());
+
+    foreach (range(1, 3) as $attempt) {
+        $this->withToken($token)->getJson('/api/moi')->assertOk();
+    }
+
+    $this->withToken($token)->getJson('/api/moi')->assertStatus(429);
 });
