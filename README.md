@@ -1,14 +1,16 @@
 # SamaCloud
 
-> **Partagez votre stack, déployez-la en un message.**
+> **Pose tes questions. Montre ton code. Trouve ton équipe.**
 
-SamaCloud est la plateforme d'échange et de déploiement des développeurs africains.
-Elle permet de **déployer, payer, surveiller et gérer** ses projets sur l'infrastructure
-Datacloud de Systalink — depuis son éditeur grâce à l'IA, ou depuis un back-office web —
-et d'**échanger** avec les autres développeurs templates, composants et solutions aux pannes.
+SamaCloud est la plateforme d'échange des développeurs africains. On y **pose ses
+questions**, on **présente ses projets avec leur code** lisible dans le navigateur, on
+**trouve des collaborateurs**, et on se fait connaître par ses contributions. Quand un
+projet est prêt, on le **met en ligne sur Datacloud** de Systalink, depuis son éditeur
+grâce à l'IA ou depuis le back-office, et on paie en FCFA par mobile money.
 
 Projet présenté au concours **CADEV de Systalink** sur le thème
-« Construire la plateforme d'échange africaine, pour les devs, par les devs ».
+« Une plateforme d'échange pour les développeurs, par les développeurs et pour les
+développeurs ».
 
 > 🚧 **Projet en cours de développement.** Les sections marquées *(à venir)* seront
 > complétées prochainement.
@@ -39,20 +41,19 @@ Projet présenté au concours **CADEV de Systalink** sur le thème
 
 ## Le problème
 
-Pour mettre un projet en ligne, un développeur africain doit aujourd'hui :
+Les développeurs africains apprennent et construisent souvent seuls :
 
-- **configurer seul un serveur nu**, sans aide ;
-- ou **payer un service étranger en devises**, avec une carte bancaire internationale
-  qu'il n'a souvent pas.
-
-Chacun refait seul les mêmes configurations, rencontre les mêmes pannes, et son talent
-reste peu visible.
+- leurs **questions se perdent** dans des groupes WhatsApp ;
+- leurs **projets restent invisibles**, faute d'hébergement simple et abordable : il faut
+  configurer seul un serveur nu, ou payer un service étranger en devises avec une carte
+  bancaire internationale qu'ils n'ont souvent pas ;
+- il est **difficile de trouver avec qui collaborer**, et leur talent reste peu visible.
 
 ## La solution
 
-**La simplicité d'un service comme Vercel, payable en FCFA par mobile money, sur une
-infrastructure locale, avec une communauté qui partage et se fait connaître par son
-travail.**
+**Une communauté où les développeurs se rencontrent, échangent, présentent leurs
+projets et collaborent, avec la mise en ligne en un message, payable en FCFA par mobile
+money, sur une infrastructure locale.**
 
 Cible : étudiants (projet de fin d'études), freelances (démo pour un client) et
 développeurs indépendants (projet personnel, portfolio) d'Afrique francophone.
@@ -61,16 +62,17 @@ développeurs indépendants (projet personnel, portfolio) d'Afrique francophone.
 
 ## Fonctionnalités
 
-SamaCloud repose sur six modules branchés sur une même API de contrôle, seule source de
+SamaCloud repose sur sept modules branchés sur une même API de contrôle, seule source de
 vérité du système.
 
 | Module | Rôle |
 |---|---|
+| **Communauté** | Questions-réponses, vitrine de projets avec éditeur de code intégré, appels à collaboration, étoiles, classement, profils publics |
 | **Moteur de déploiement** | Applications et bases de données à partir du catalogue, déploiement depuis Git ou depuis un template, sous-domaine et certificat SSL, réseau isolé par projet, quotas |
 | **Commande et paiement** | Catalogue, devis en FCFA, lien de paiement de 15 minutes, réservation de capacité, confirmation par webhook, crédits et renouvellements |
 | **Back-office client** | Interface web pensée d'abord pour mobile : projets, monitoring, logs, déploiements, journal d'audit, commandes et échéances |
 | **Serveur MCP** | Le développeur pilote la plateforme en langage naturel depuis VS Code, Cursor ou Claude — **fonctionnalité phare** |
-| **Couche d'échange** | Templates et composants partagés, pannes résolues, étoiles, classement, profils publics |
+| **Couche d'échange** | Templates de déploiement partagés et pannes résolues |
 | **Console d'administration** | Catalogue et tarifs, capacité, crédits, suspension des comptes abusifs |
 
 > **Principe directeur** : le back-office et le serveur MCP sont deux façades sur le même
@@ -78,14 +80,17 @@ vérité du système.
 > métrique affichée dans le back-office est exactement celle que l'IA lit pour faire un
 > diagnostic.
 
-### Couche d'échange : « par les devs, pour les devs »
+### Communauté : « par les devs, pour les devs »
 
 | Brique | Ce qu'elle fait |
 |---|---|
+| Questions-réponses | Poser une question avec du code, répondre, voter « Utile » ; l'auteur accepte la réponse qui l'a aidé |
+| Vitrine de projets | Coller le lien d'un dépôt GitHub public : SamaCloud le clone et l'ouvre dans un éditeur intégré (Monaco). Les visiteurs lisent, copient et téléchargent le code (.zip) ; l'équipe du projet le modifie dans la copie SamaCloud. GitHub n'est pas modifié et le code n'est pas exécuté dans le navigateur : « Voir la démo » ouvre la version déployée |
+| Appels à collaboration | Publier un besoin (freelance, plein temps, bénévole, hackathon) avec rémunération, stack, livrables et délai ; les développeurs postulent avec leur profil public |
 | Templates et composants | Un développeur publie sa stack (`datacloud.yaml`, README, captures). Bouton « Déployer ce template » |
 | Pannes résolues | Après un auto-diagnostic réussi, l'IA propose de partager l'incident anonymisé : symptôme, cause, correctif |
-| Étoiles | Les développeurs récompensent les contenus qui les ont aidés |
-| Classement *(bêta)* | Meilleurs développeurs par pays : étoile reçue +5, déploiement d'un de ses templates +2, développeur aidé +2, contenu publié +10 |
+| Étoiles | Les développeurs récompensent les réponses, projets, templates et pannes qui les ont aidés |
+| Classement | Meilleurs développeurs par pays : étoile reçue +5, réponse acceptée +15, déploiement d'un de ses templates +2, développeur aidé +2, contenu publié +10 |
 | Profil public | Vitrine qui ouvre des opportunités : missions freelance, emplois, collaborations |
 
 ---
@@ -99,22 +104,21 @@ l'on passe par le navigateur ou par l'IA.
 flowchart TB
     subgraph EXT[Accès externes]
         NAV[Navigateur<br/>back-office Angular]
-        EDI[Éditeur du développeur<br/>VS Code · Cursor · Claude]
+        EDI[Éditeur du développeur<br/>VS Code · Cursor · Claude<br/>+ serveur MCP local]
         PAY[Fournisseur de paiement<br/>Paxity ou agrégateur]
     end
 
     subgraph SRV[Serveur Datacloud]
-        PROXY[Reverse proxy<br/>HTTPS · routage par sous-domaine]
-        MCP[Serveur MCP<br/>TypeScript · sans logique métier]
+        PROXY[Traefik<br/>HTTPS · routes automatiques]
         API[API de contrôle · Laravel<br/>Sanctum · quotas · devis · audit · échange]
         DB[(PostgreSQL<br/>comptes · projets · commandes)]
-        WORKER[Worker de déploiement<br/>seul accès à Docker]
+        WORKER[Worker<br/>Git · Nixpacks · seul accès à Docker]
         ALERT[Alertes<br/>e-mail]
         APPS[Applications des clients<br/>conteneurs Docker · un réseau isolé par projet]
     end
 
     NAV --> PROXY --> API
-    EDI --> MCP --> API
+    EDI -- jeton agent IA --> PROXY
     PAY -- webhook signé --> API
     API --> DB
     API --> WORKER --> APPS
@@ -122,7 +126,8 @@ flowchart TB
     PROXY --> APPS
 ```
 
-- Le trafic des applications déployées entre par le reverse proxy.
+- Tout le trafic entre par Traefik, qui crée la route et le certificat HTTPS de chaque
+  nouveau conteneur à partir de ses étiquettes Docker (`*.samacloud.app`).
 - Le back-office et le serveur MCP appellent l'API avec le jeton du client.
 - Seul le worker de déploiement pilote Docker.
 - Les bases de données des clients ne sont jamais exposées sur internet.
@@ -138,11 +143,11 @@ puisse l'expliquer.
 
 | Couche | Technologie |
 |---|---|
-| Back-office et échange | Angular (TypeScript), client généré depuis l'OpenAPI |
+| Front (communauté et back-office) | Angular (TypeScript), éditeur de code Monaco, client généré depuis l'OpenAPI |
 | API de contrôle | Laravel, Sanctum, files Laravel |
 | Serveur MCP | TypeScript, SDK MCP officiel |
 | Données | PostgreSQL |
-| Exécution | Docker, reverse proxy (Caddy ou Traefik), DNS générique |
+| Exécution | Git, Nixpacks, Docker, Traefik (Let's Encrypt), DNS générique `*.samacloud.app` |
 | Qualité | Pest, build Angular, CI, contrôle des licences |
 
 ---
@@ -168,7 +173,7 @@ Développeur : « Oui. »
 
 IA : Voici votre lien de paiement, valable 15 minutes : https://…
      … paiement confirmé, déploiement en cours …
-     Votre blog est en ligne : https://mon-blog.<domaine>
+     Votre blog est en ligne : https://mon-blog.samacloud.app
 ```
 
 ### Fonctionnalités clés
@@ -308,8 +313,11 @@ agrégateur (PayDunya, CinetPay, Hub2) en secours ; un **mode test simulé** pou
 - **Protection contre l'injection de prompt** : logs, fichiers et incidents lus par l'IA
   sont des données, jamais des instructions.
 - Secrets générés par l'API, stockés chiffrés, absents des logs et des templates publiés.
-- Docker accessible uniquement au worker de déploiement ; seul le reverse proxy est
-  exposé sur internet.
+- Docker accessible uniquement au worker de déploiement (Traefik en lecture seule) ;
+  seul Traefik est exposé sur internet.
+- Noms de sous-domaines réservés (`www`, `api`, `mcp`, `pay`, `admin`) ; cookies de la
+  plateforme limités à `samacloud.app`.
+- Dépôts clonés pour la vitrine : `.env`, binaires, `node_modules` et `vendor` écartés.
 - Quotas par compte et plafond de mémoire par conteneur.
 - **L'IA ne paie jamais** : elle génère un lien, un humain valide.
 - Opérations longues asynchrones et actions idempotentes.
@@ -334,9 +342,9 @@ Organisation prévue *(à venir)* :
 ```text
 .
 ├── api/        # API de contrôle Laravel
-├── front/      # back-office et couche d'échange Angular
+├── front/      # communauté et back-office Angular
 ├── mcp/        # serveur MCP TypeScript
-├── infra/      # configuration Docker, reverse proxy, scripts serveur
+├── infra/      # configuration Docker, Traefik, scripts serveur
 └── docs/       # cahier des charges, spécifications, OpenAPI, déclarations
 ```
 
@@ -395,7 +403,8 @@ arrive sur une plateforme vivante : projets en ligne, graphiques remplis, un dé
 ## Feuille de route
 
 - Offres équipe, agence et entreprise avec comptes multi-utilisateurs
-- Missions et appels à collaboration publiés par les entreprises sur les profils publics
+- Comptes entreprise pour publier des missions et recruter depuis les profils publics
+- Envoi des modifications de la vitrine vers GitHub (pull request)
 - Durées de paiement au choix (1, 3 ou 12 mois) et offre d'essai
 - Inscription par numéro de téléphone, alertes par SMS et WhatsApp
 - Serveur MCP hébergé avec connexion OAuth (plus de jeton à copier)
@@ -409,7 +418,8 @@ arrive sur une plateforme vivante : projets en ligne, graphiques remplis, un dé
 
 - **Licences** : liste des composants et de leurs licences générée automatiquement
   (`composer licenses`, `license-checker`) et vérifiée en CI. Briques principales sous
-  licence permissive : Laravel, Angular (MIT), Docker, Caddy (Apache 2.0), PostgreSQL.
+  licence permissive : Laravel, Angular, Traefik, Nixpacks, Monaco (MIT), Docker
+  (Apache 2.0), PostgreSQL (licence PostgreSQL).
   Toute dépendance GPL, AGPL ou LGPL est écartée ou soumise aux organisateurs.
 - **Usage de l'IA** : journal tenu dès le début. La conception de l'architecture, du
   modèle de paiement, du cahier des charges et des spécifications a été réalisée avec
