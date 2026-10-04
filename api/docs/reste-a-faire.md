@@ -151,7 +151,7 @@ Il est construit partie par partie, dans cet ordre (chaque partie s'appuie sur l
 | C1 | Profils publics, technologies, recherche de profils | Fait |
 | C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | Fait |
 | C3 | Points de réputation, classement par pays, anti-triche | Fait pour les questions-réponses. Les étoiles sur les projets, templates et pannes arriveront avec ces contenus (C4 et sprint 4) |
-| C4 | Vitrine de projets : dépôt GitHub cloné, fichiers lisibles et modifiables, `.zip`, commentaires | À faire |
+| C4 | Vitrine de projets : dépôt GitHub copié, fichiers lisibles et modifiables, `.zip`, étoiles, commentaires | En partie : import, lecture du code et `.zip` faits ; restent la modification des fichiers, les étoiles et les commentaires |
 | C5 | Appels à collaboration : publication, candidatures, acceptation, équipe du projet | À faire |
 
 Routes de la partie C1 : `GET /api/technologies`, `GET /api/profils` (filtres `q`, `pays`,
@@ -227,11 +227,40 @@ Ce qui est volontairement laissé de côté dans C3 :
 - [ ] **Performance** : le classement est recalculé à chaque appel. Suffisant pour le concours ; au-delà de
   quelques milliers de membres, prévoir un cache de quelques minutes.
 
-Points d'attention pour C4 (vitrine) :
+Routes de la partie C4 (première moitié) — publiques : `GET /api/vitrine` (filtres `q`, `technologie`,
+`par_page`), `GET /api/vitrine/{id}`, `GET /api/vitrine/{id}/fichiers`,
+`GET /api/vitrine/{id}/fichiers/contenu?chemin=…`, `GET /api/vitrine/{id}/archive` ; avec un jeton de
+session : `POST /api/vitrine`, `PATCH` et `DELETE /api/vitrine/{id}`, `POST /api/vitrine/{id}/import`.
 
-- Le clonage d'un dépôt est une opération longue faite par le worker : à coordonner avec Souleymane.
-- Écarter `.env`, binaires, `node_modules` et `vendor` ; limiter la taille ; ne jamais exécuter le code.
+Décisions prises pour la vitrine :
 
+- **Pas de `git clone`** : l'API télécharge l'archive `.zip` du dépôt chez GitHub et la lit. Aucune commande
+  n'est lancée et aucun code n'est exécuté, donc pas besoin d'accès à Docker.
+- **Fichiers stockés dans PostgreSQL** (table `showcase_files`), pas sur le disque : sauvegarde unique,
+  modification simple, pas de volume à gérer.
+- **Limites** (dans `config/samacloud.php`) : archive de 30 Mo, 500 fichiers, 200 Ko par fichier, 5 Mo au total.
+  Au-delà, le projet est marqué « incomplet ».
+- **Écartés** : `.env` et ses variantes, clés et certificats, `node_modules`, `vendor`, dossiers générés,
+  binaires, fichiers de verrouillage.
+
+Ce qui est volontairement laissé de côté :
+
+- [ ] **Un worker de file d'attente doit tourner en production** (`php artisan queue:work`). Sans lui, les
+  imports restent « en_attente » indéfiniment. À demander à Souleymane, avec le démarrage automatique.
+- [ ] **Imports bloqués** : si le worker s'arrête en plein import, le projet reste « en_cours ».
+  Prévoir une commande planifiée qui passe en « echec » les imports trop vieux.
+- [ ] **Captures d'écran du projet** : demandent un stockage de fichiers (volume ou stockage objet Datacloud),
+  à décider avec Souleymane.
+- [ ] **Limite d'appels de GitHub** : sans jeton, GitHub accepte 60 téléchargements par heure et par adresse IP
+  du serveur. Suffisant pour le concours ; au-delà, ajouter un jeton GitHub de SamaCloud dans la configuration.
+- [ ] **Dépôts privés** : non pris en charge (le README parle de dépôt public).
+- [ ] **Archive lue en mémoire** (30 Mo au plus) : suffisant ; pour de plus gros dépôts, écrire directement
+  sur le disque pendant le téléchargement.
+- [ ] **Lien automatique avec un projet déployé** : « Voir la démo » est une adresse saisie à la main
+  (`demo_url`), pas encore reliée aux projets hébergés.
+- [ ] **Signalement d'un projet de la vitrine** : seules les questions et réponses se signalent.
+- [ ] À dire à Thioro : nettoyer le Markdown de `description` avant affichage (comme pour les questions) ;
+  le contenu des fichiers est du texte brut à donner à Monaco, jamais à insérer comme HTML.
 Le sujet du concours est « la plateforme d'échange » et la pertinence pèse 25 % de la note :
 ce module ne doit pas être gardé pour la fin.
 
