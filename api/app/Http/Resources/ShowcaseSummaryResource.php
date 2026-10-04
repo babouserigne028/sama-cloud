@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 /**
  * Projet de la vitrine dans une liste : un extrait au lieu de la description complète.
- * À charger à l'avance : « owner.profile » et « technologies ».
+ * À charger à l'avance : « owner.profile », « technologies » et les compteurs « stargazers » et « comments ».
  *
  * @mixin Showcase
  */
@@ -32,6 +32,8 @@ final class ShowcaseSummaryResource extends JsonResource
             'depot' => $this->repository()->url(),
             'demo_url' => $this->demo_url,
             'nb_fichiers' => $this->files_count,
+            'nb_etoiles' => (int) $this->stargazers_count,
+            'nb_commentaires' => (int) $this->comments_count,
             'cree_le' => $this->created_at->toIso8601String(),
         ];
     }

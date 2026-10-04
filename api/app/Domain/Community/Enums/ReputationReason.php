@@ -15,11 +15,14 @@ enum ReputationReason: string
     /** Un autre développeur a voté « Utile » pour sa réponse (une étoile reçue). */
     case AnswerVotedUseful = 'vote_utile';
 
+    /** Un autre développeur a donné une étoile à son projet de la vitrine. */
+    case ShowcaseStarred = 'etoile_projet';
+
     public function points(): int
     {
         return match ($this) {
             self::AnswerAccepted => 15,
-            self::AnswerVotedUseful => 5,
+            self::AnswerVotedUseful, self::ShowcaseStarred => 5,
         };
     }
 }

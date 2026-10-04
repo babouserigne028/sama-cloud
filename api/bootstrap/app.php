@@ -36,6 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Toute l'API répond en JSON, même si le client oublie l'en-tête « Accept ».
         $middleware->api(prepend: [ForceJsonResponse::class]);
 
+        // Laravel retire les espaces au début et à la fin des champs reçus. Il ne doit pas le faire
+        // pour le contenu d'un fichier (le saut de ligne final compte) ni pour un mot de passe.
+        $middleware->trimStrings(except: ['contenu', 'mot_de_passe', 'mot_de_passe_confirmation']);
+
         // Limite de débit définie dans AppServiceProvider (limiteur « api »).
         $middleware->throttleApi();
 

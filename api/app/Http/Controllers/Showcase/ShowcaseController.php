@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Showcase;
 
+use App\Application\Showcase\Actions\DeleteShowcase;
 use App\Application\Showcase\Actions\PublishShowcase;
 use App\Application\Showcase\Queries\SearchShowcases;
 use App\Http\Controllers\Controller;
@@ -17,6 +18,7 @@ use App\Models\Technology;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -42,6 +44,8 @@ final class ShowcaseController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
             // Slug d'une technologie (ex. laravel).
             'technologie' => ['nullable', 'string', 'max:40'],
+            // « recents » (par défaut) ou « etoiles » pour les projets les plus étoilés d'abord.
+            'tri' => ['nullable', 'string', 'in:recents,etoiles'],
             // Nombre de projets par page (20 par défaut, 50 au plus).
             'par_page' => ['nullable', 'integer', 'min:1', 'max:50'],
         ]);
@@ -49,6 +53,7 @@ final class ShowcaseController extends Controller
         $showcases = $searchShowcases->handle(
             search: isset($filters['q']) ? trim((string) $filters['q']) : null,
             technologySlug: $filters['technologie'] ?? null,
+            mostStarredFirst: ($filters['tri'] ?? 'recents') === 'etoiles',
             perPage: (int) ($filters['par_page'] ?? 20),
         );
 
@@ -58,15 +63,18 @@ final class ShowcaseController extends Controller
     /**
      * Voir un projet de la vitrine.
      *
-     * Lecture publique. « import.statut » indique si le code est disponible.
+     * Lecture publique. « import.statut » indique si le code est disponible. Avec un jeton,
+     * « etoile_par_moi » indique si le compte a déjà donné une étoile.
      *
      * @unauthenticated
      *
      * @param  string  $id  Identifiant du projet.
      */
-    public function show(string $id): ShowcaseResource
+    public function show(Request $request, string $id): ShowcaseResource
     {
-        return new ShowcaseResource($this->find($id));
+        $viewer = $request->user('sanctum');
+
+        return new ShowcaseResource($this->find($id, $viewer instanceof User ? $viewer : null));
     }
 
     /**
@@ -124,13 +132,13 @@ final class ShowcaseController extends Controller
      *
      * @param  string  $id  Identifiant du projet.
      */
-    public function destroy(string $id): Response
+    public function destroy(string $id, DeleteShowcase $deleteShowcase): Response
     {
         $showcase = Showcase::query()->findOrFail($id);
 
         Gate::authorize('delete', $showcase);
 
-        $showcase->delete();
+        $deleteShowcase->handle($showcase);
 
         return response()->noContent();
     }
@@ -155,8 +163,23 @@ final class ShowcaseController extends Controller
         return (new ShowcaseResource($this->find($showcase->id)))->response()->setStatusCode(202);
     }
 
-    private function find(string $id): Showcase
+    /**
+     * Charge un projet avec ce dont la ressource a besoin.
+     *
+     * @param  User|null  $viewer  Compte connecté, s'il y en a un : sert à dire s'il a donné une étoile.
+     */
+    private function find(string $id, ?User $viewer = null): Showcase
     {
-        return Showcase::query()->with(['owner.profile', 'technologies'])->findOrFail($id);
+        $query = Showcase::query()
+            ->with(['owner.profile', 'technologies'])
+            ->withCount(['stargazers', 'comments']);
+
+        if ($viewer !== null) {
+            $query->withExists([
+                'stargazers as starred_by_viewer' => fn (Builder $user) => $user->where('users.id', $viewer->id),
+            ]);
+        }
+
+        return $query->findOrFail($id);
     }
 }

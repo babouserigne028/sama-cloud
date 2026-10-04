@@ -3692,6 +3692,22 @@
                         }
                     },
                     {
+                        "name": "tri",
+                        "in": "query",
+                        "description": "\u00ab recents \u00bb (par d\u00e9faut) ou \u00ab etoiles \u00bb pour les projets les plus \u00e9toil\u00e9s d'abord.",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                "recents",
+                                "etoiles",
+                                null
+                            ]
+                        }
+                    },
+                    {
                         "name": "par_page",
                         "in": "query",
                         "description": "Nombre de projets par page (20 par d\u00e9faut, 50 au plus).",
@@ -3950,7 +3966,7 @@
         "/vitrine/{id}": {
             "get": {
                 "operationId": "showcases.show",
-                "description": "Lecture publique. \u00ab import.statut \u00bb indique si le code est disponible.",
+                "description": "Lecture publique. \u00ab import.statut \u00bb indique si le code est disponible. Avec un jeton,\n\u00ab etoile_par_moi \u00bb indique si le compte a d\u00e9j\u00e0 donn\u00e9 une \u00e9toile.",
                 "summary": "Voir un projet de la vitrine",
                 "tags": [
                     "Communaut\u00e9 \u2014 vitrine de projets"
@@ -4266,16 +4282,6 @@
                         "schema": {
                             "type": "string"
                         }
-                    },
-                    {
-                        "name": "chemin",
-                        "in": "query",
-                        "required": true,
-                        "description": "Chemin du fichier, tel que donn\u00e9 par la liste des fichiers.",
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 400
-                        }
                     }
                 ],
                 "responses": {
@@ -4323,6 +4329,122 @@
                             }
                         }
                     },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "put": {
+                "operationId": "showcase-files.update",
+                "description": "R\u00e9serv\u00e9 au propri\u00e9taire du projet. Cr\u00e9e le fichier s'il n'existe pas, le remplace sinon.\nSeule la copie SamaCloud est modifi\u00e9e : GitHub ne change pas. Les m\u00eames r\u00e8gles qu'\u00e0 l'import\ns'appliquent (pas de fichier .env, pas de binaire, taille limit\u00e9e).",
+                "summary": "Enregistrer un fichier",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SaveShowcaseFileRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chemin": {
+                                                    "type": "string"
+                                                },
+                                                "taille_octets": {
+                                                    "type": "integer"
+                                                },
+                                                "contenu": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "chemin",
+                                                "taille_octets",
+                                                "contenu"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `import_en_cours` \u2014 Un import est en cours : il remplacerait la modification.\n- `limite_vitrine_atteinte` \u2014 Le projet d\u00e9passerait le nombre de fichiers ou la taille autoris\u00e9s.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
                         "content": {
@@ -4343,8 +4465,81 @@
                             }
                         }
                     }
-                },
-                "security": []
+                }
+            },
+            "delete": {
+                "operationId": "showcase-files.destroy",
+                "description": "R\u00e9serv\u00e9 au propri\u00e9taire du projet. Seule la copie SamaCloud est modifi\u00e9e.",
+                "summary": "Supprimer un fichier",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `import_en_cours` \u2014 Un import est en cours.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/vitrine/{id}/archive": {
@@ -4409,6 +4604,299 @@
                     }
                 },
                 "security": []
+            }
+        },
+        "/vitrine/{id}/commentaires": {
+            "get": {
+                "operationId": "showcase-comments.index",
+                "description": "Lecture publique, du plus r\u00e9cent au plus ancien, 20 par page.",
+                "summary": "Lister les commentaires d'un projet",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ShowcaseCommentResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShowcaseCommentResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "post": {
+                "operationId": "showcase-comments.store",
+                "description": "Le propri\u00e9taire du projet re\u00e7oit une notification.",
+                "summary": "Commenter un projet",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "contenu": {
+                                        "type": "string",
+                                        "description": "Texte simple, 2 \u00e0 2000 caract\u00e8res.",
+                                        "minLength": 2,
+                                        "maxLength": 2000
+                                    }
+                                },
+                                "required": [
+                                    "contenu"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`ShowcaseCommentResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ShowcaseCommentResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/vitrine/{id}/import": {
@@ -4481,6 +4969,265 @@
                     },
                     "409": {
                         "description": "- `import_en_cours` \u2014 Un import de ce d\u00e9p\u00f4t n'est pas termin\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/vitrine/{id}/etoile": {
+            "put": {
+                "operationId": "showcase-stars.store",
+                "description": "Une seule \u00e9toile par compte et par projet : la donner deux fois ne change rien.\nLe propri\u00e9taire du projet gagne 5 points. Un jeton d'agent IA ne peut pas donner d'\u00e9toile.",
+                "summary": "Donner une \u00e9toile \u00e0 un projet",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "projet_id": {
+                                                    "type": "string"
+                                                },
+                                                "nb_etoiles": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                },
+                                                "etoile_par_moi": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "projet_id",
+                                                "nb_etoiles",
+                                                "etoile_par_moi"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.\n- `etoile_sur_son_projet` \u2014 On ne donne pas d'\u00e9toile \u00e0 son propre projet.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "showcase-stars.destroy",
+                "summary": "Retirer son \u00e9toile",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "projet_id": {
+                                                    "type": "string"
+                                                },
+                                                "nb_etoiles": {
+                                                    "type": "integer",
+                                                    "minimum": 0
+                                                },
+                                                "etoile_par_moi": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "projet_id",
+                                                "nb_etoiles",
+                                                "etoile_par_moi"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/commentaires/{id}": {
+            "delete": {
+                "operationId": "showcase-comments.destroy",
+                "description": "R\u00e9serv\u00e9 \u00e0 son auteur, au propri\u00e9taire du projet comment\u00e9, ou \u00e0 un administrateur.",
+                "summary": "Supprimer un commentaire",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du commentaire.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5943,6 +6690,26 @@
                 ],
                 "title": "ResourceSize"
             },
+            "SaveShowcaseFileRequest": {
+                "type": "object",
+                "description": "Cr\u00e9ation ou modification d'un fichier dans la copie SamaCloud d'un projet.",
+                "properties": {
+                    "chemin": {
+                        "type": "string",
+                        "description": "Chemin du fichier dans le projet (ex. src/app.php).",
+                        "maxLength": 400
+                    },
+                    "contenu": {
+                        "type": "string",
+                        "description": "Contenu complet du fichier (texte). Une cha\u00eene vide est permise."
+                    }
+                },
+                "required": [
+                    "chemin",
+                    "contenu"
+                ],
+                "title": "SaveShowcaseFileRequest"
+            },
             "ServiceType": {
                 "type": "string",
                 "description": "Type de service, tel que d\u00e9fini dans datacloud.yaml.\n| |\n|---|\n| `web` <br/> Re\u00e7oit du trafic HTTP et poss\u00e8de une adresse publique. |\n| `worker` <br/> T\u00e2che de fond (file d'attente, planificateur), sans adresse publique. |",
@@ -5951,6 +6718,31 @@
                     "worker"
                 ],
                 "title": "ServiceType"
+            },
+            "ShowcaseCommentResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "contenu": {
+                        "type": "string",
+                        "description": "Texte simple, \u00e0 afficher tel quel (jamais comme du HTML)."
+                    },
+                    "auteur": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "contenu",
+                    "auteur",
+                    "cree_le"
+                ],
+                "title": "ShowcaseCommentResource"
             },
             "ShowcaseResource": {
                 "type": "object",
@@ -6021,6 +6813,16 @@
                     "nb_fichiers": {
                         "type": "integer"
                     },
+                    "nb_etoiles": {
+                        "type": "integer"
+                    },
+                    "etoile_par_moi": {
+                        "type": "boolean",
+                        "description": "Vrai si le compte connect\u00e9 a donn\u00e9 une \u00e9toile. Toujours faux sans jeton."
+                    },
+                    "nb_commentaires": {
+                        "type": "integer"
+                    },
                     "taille_octets": {
                         "type": "integer"
                     },
@@ -6046,6 +6848,9 @@
                     "demo_url",
                     "import",
                     "nb_fichiers",
+                    "nb_etoiles",
+                    "etoile_par_moi",
+                    "nb_commentaires",
                     "taille_octets",
                     "incomplet",
                     "cree_le",
@@ -6087,6 +6892,12 @@
                     "nb_fichiers": {
                         "type": "integer"
                     },
+                    "nb_etoiles": {
+                        "type": "integer"
+                    },
+                    "nb_commentaires": {
+                        "type": "integer"
+                    },
                     "cree_le": {
                         "type": "string"
                     }
@@ -6100,6 +6911,8 @@
                     "depot",
                     "demo_url",
                     "nb_fichiers",
+                    "nb_etoiles",
+                    "nb_commentaires",
                     "cree_le"
                 ],
                 "title": "ShowcaseSummaryResource"

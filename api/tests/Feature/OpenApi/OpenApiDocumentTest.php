@@ -139,6 +139,7 @@ test('seules l\'inscription, la connexion et la lecture de la communauté sont p
         'GET /vitrine/{id}/fichiers',
         'GET /vitrine/{id}/fichiers/contenu',
         'GET /vitrine/{id}/archive',
+        'GET /vitrine/{id}/commentaires',
     ]);
 });
 

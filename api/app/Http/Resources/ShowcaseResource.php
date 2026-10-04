@@ -10,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Projet de la vitrine, avec sa description complète et l'état de son import.
- * À charger à l'avance : « owner.profile » et « technologies ».
+ * À charger à l'avance : « owner.profile », « technologies » et les compteurs « stargazers » et « comments ».
  *
  * @mixin Showcase
  */
@@ -41,6 +41,10 @@ final class ShowcaseResource extends JsonResource
                 'termine_le' => $this->imported_at?->toIso8601String(),
             ],
             'nb_fichiers' => $this->files_count,
+            'nb_etoiles' => (int) $this->stargazers_count,
+            // Vrai si le compte connecté a donné une étoile. Toujours faux sans jeton.
+            'etoile_par_moi' => (bool) ($this->resource->getAttributes()['starred_by_viewer'] ?? false),
+            'nb_commentaires' => (int) $this->comments_count,
             'taille_octets' => $this->total_bytes,
             // Vrai si le dépôt dépassait les limites : une partie des fichiers n'a pas été copiée.
             'incomplet' => $this->is_truncated,

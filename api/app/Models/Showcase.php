@@ -40,6 +40,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonImmutable $updated_at
  * @property-read User $owner
  * @property-read Collection<int, Technology> $technologies
+ * @property-read int|null $stargazers_count
+ * @property-read int|null $comments_count
  */
 #[Fillable([
     'user_id', 'title', 'description', 'repository_owner', 'repository_name', 'branch', 'demo_url',
@@ -97,6 +99,24 @@ class Showcase extends Model
     public function files(): HasMany
     {
         return $this->hasMany(ShowcaseFile::class);
+    }
+
+    /**
+     * Comptes qui ont donné une étoile à ce projet.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function stargazers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'showcase_stars')->withPivot('created_at');
+    }
+
+    /**
+     * @return HasMany<ShowcaseComment, $this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ShowcaseComment::class);
     }
 
     public function repository(): GitHubRepository
