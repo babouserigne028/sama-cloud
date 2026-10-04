@@ -151,7 +151,7 @@ Il est construit partie par partie, dans cet ordre (chaque partie s'appuie sur l
 | C1 | Profils publics, technologies, recherche de profils | Fait |
 | C2 | Questions-réponses : question avec code, réponses, vote « Utile », réponse acceptée | Fait |
 | C3 | Points de réputation, classement par pays, anti-triche | Fait pour les questions-réponses. Les étoiles sur les projets, templates et pannes arriveront avec ces contenus (C4 et sprint 4) |
-| C4 | Vitrine de projets : dépôt GitHub copié, fichiers lisibles et modifiables, `.zip`, étoiles, commentaires | En partie : import, lecture du code et `.zip` faits ; restent la modification des fichiers, les étoiles et les commentaires |
+| C4 | Vitrine de projets : dépôt GitHub copié, fichiers lisibles et modifiables, `.zip`, étoiles, commentaires | Fait (la modification par les membres d'une équipe arrive avec C5) |
 | C5 | Appels à collaboration : publication, candidatures, acceptation, équipe du projet | À faire |
 
 Routes de la partie C1 : `GET /api/technologies`, `GET /api/profils` (filtres `q`, `pays`,
@@ -218,8 +218,9 @@ Ce qui est volontairement laissé de côté dans C3 :
   À décider avant la soumission : mettre `COMMUNITY_MIN_ACCOUNT_AGE_HOURS=0` sur la plateforme de
   démonstration, ou l'expliquer dans l'interface. Les points ne sont pas donnés après coup quand le
   compte atteint 24 heures.
-- [ ] **Étoiles sur les projets, templates et pannes** (+5), **déploiement d'un template** (+2),
-  **développeur aidé par une panne** (+2), **contenu publié** (+10) : ces contenus n'existent pas encore.
+- [x] **Étoiles sur les projets de la vitrine** (+5 au propriétaire) : fait avec la partie C4.
+- [ ] **Étoiles sur les templates et les pannes** (+5), **déploiement d'un template** (+2),
+  **développeur aidé par une panne** (+2), **contenu publié** (+10) : ces contenus arrivent au sprint 4.
   Le registre des points (`ReputationLedger`) est prêt à les recevoir.
 - [ ] **Rang affiché sur le profil public** : le profil montre les points, pas encore le rang.
 - [ ] **Alerte aux administrateurs en cas de pic anormal de votes** sur un compte.
@@ -231,6 +232,22 @@ Routes de la partie C4 (première moitié) — publiques : `GET /api/vitrine` (f
 `par_page`), `GET /api/vitrine/{id}`, `GET /api/vitrine/{id}/fichiers`,
 `GET /api/vitrine/{id}/fichiers/contenu?chemin=…`, `GET /api/vitrine/{id}/archive` ; avec un jeton de
 session : `POST /api/vitrine`, `PATCH` et `DELETE /api/vitrine/{id}`, `POST /api/vitrine/{id}/import`.
+
+Routes de la partie C4 (seconde moitié) — publique : `GET /api/vitrine/{id}/commentaires` ; avec un jeton de
+session : `PUT` et `DELETE /api/vitrine/{id}/fichiers/contenu`, `PUT` et `DELETE /api/vitrine/{id}/etoile`,
+`POST /api/vitrine/{id}/commentaires`, `DELETE /api/commentaires/{id}`. La liste accepte `tri=etoiles`.
+
+Ce qui est volontairement laissé de côté dans la seconde moitié :
+
+- [ ] **Relancer l'import écrase les modifications faites dans l'éditeur.** `POST /api/vitrine/{id}/import`
+  remplace tous les fichiers par ceux de GitHub. À dire à Thioro : afficher un avertissement avant de relancer.
+- [ ] **Pas d'historique des modifications** d'un fichier : la dernière version enregistrée remplace la précédente.
+- [ ] **Modification par l'équipe** : seul le propriétaire modifie les fichiers. Les membres acceptés par un
+  appel à collaboration pourront le faire avec la partie C5.
+- [ ] **Renommer ou déplacer un fichier** : il faut l'enregistrer sous le nouveau chemin puis supprimer l'ancien.
+- [ ] **Signalement d'un projet ou d'un commentaire** : le propriétaire modère les commentaires de sa page et
+  un administrateur peut tout retirer, mais les membres ne peuvent pas encore signaler ces contenus.
+- [ ] **Commentaires en texte simple**, sans réponses imbriquées ni modification après publication.
 
 Décisions prises pour la vitrine :
 
