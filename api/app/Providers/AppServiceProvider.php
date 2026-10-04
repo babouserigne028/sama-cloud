@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Application\Showcase\Contracts\RepositorySource;
 use App\Http\OpenApi\DocumentTransformer;
 use App\Http\OpenApi\ErrorResponsesTransformer;
+use App\Infrastructure\Showcase\GitHubRepositorySource;
 use App\Models\PersonalAccessToken;
 use Carbon\CarbonImmutable;
 use Dedoc\Scramble\Scramble;
@@ -27,7 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // La vitrine lit les dépôts chez GitHub. Les tests remplacent cette source par une fausse.
+        $this->app->bind(RepositorySource::class, GitHubRepositorySource::class);
     }
 
     /**

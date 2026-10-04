@@ -25,6 +25,15 @@ return [
         'min_account_age_hours_for_points' => (int) env('COMMUNITY_MIN_ACCOUNT_AGE_HOURS', 24),
     ],
 
+    'showcase' => [
+        // Limites de la copie d'un dépôt GitHub dans la vitrine.
+        'max_archive_bytes' => 30 * 1024 * 1024, // archive téléchargée depuis GitHub
+        'max_files' => 500,                      // fichiers gardés
+        'max_file_bytes' => 200 * 1024,          // taille d'un fichier
+        'max_total_bytes' => 5 * 1024 * 1024,    // taille de tous les fichiers gardés
+        'download_timeout_seconds' => 60,
+    ],
+
     'auth' => [
         // Essais de connexion ou d'inscription par minute, pour une même adresse e-mail et une même adresse IP.
         'attempts_per_minute' => (int) env('AUTH_ATTEMPTS_PER_MINUTE', 5),

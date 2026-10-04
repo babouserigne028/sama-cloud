@@ -23,6 +23,8 @@ use App\Http\Controllers\Community\TechnologyController;
 use App\Http\Controllers\DeploymentController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\Showcase\ShowcaseController;
+use App\Http\Controllers\Showcase\ShowcaseFileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,6 +51,11 @@ Route::get('classement', LeaderboardController::class)->name('leaderboard');
 Route::get('questions', [QuestionController::class, 'index'])->name('questions.index');
 Route::get('questions/{id}', [QuestionController::class, 'show'])->whereUlid('id')->name('questions.show');
 Route::get('questions/{id}/reponses', [AnswerController::class, 'index'])->whereUlid('id')->name('answers.index');
+Route::get('vitrine', [ShowcaseController::class, 'index'])->name('showcases.index');
+Route::get('vitrine/{id}', [ShowcaseController::class, 'show'])->whereUlid('id')->name('showcases.show');
+Route::get('vitrine/{id}/fichiers', [ShowcaseFileController::class, 'index'])->whereUlid('id')->name('showcase-files.index');
+Route::get('vitrine/{id}/fichiers/contenu', [ShowcaseFileController::class, 'show'])->whereUlid('id')->name('showcase-files.show');
+Route::get('vitrine/{id}/archive', [ShowcaseFileController::class, 'archive'])->whereUlid('id')->name('showcase-files.archive');
 
 // --- Routes qui exigent un jeton valide et un compte non suspendu ---
 Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($projectName) {
@@ -87,6 +94,11 @@ Route::middleware(['auth:sanctum', 'account.active'])->group(function () use ($p
 
         Route::put('reponses/{id}/vote-utile', [AnswerVoteController::class, 'store'])->whereUlid('id')->name('answer-votes.store');
         Route::delete('reponses/{id}/vote-utile', [AnswerVoteController::class, 'destroy'])->whereUlid('id')->name('answer-votes.destroy');
+
+        Route::post('vitrine', [ShowcaseController::class, 'store'])->name('showcases.store');
+        Route::patch('vitrine/{id}', [ShowcaseController::class, 'update'])->whereUlid('id')->name('showcases.update');
+        Route::delete('vitrine/{id}', [ShowcaseController::class, 'destroy'])->whereUlid('id')->name('showcases.destroy');
+        Route::post('vitrine/{id}/import', [ShowcaseController::class, 'reimport'])->whereUlid('id')->name('showcases.reimport');
 
         Route::post('questions/{id}/signalements', [ReportController::class, 'question'])->whereUlid('id')->name('reports.question');
         Route::post('reponses/{id}/signalements', [ReportController::class, 'answer'])->whereUlid('id')->name('reports.answer');

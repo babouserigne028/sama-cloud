@@ -34,6 +34,9 @@
             "name": "Communaut\u00e9 \u2014 notifications"
         },
         {
+            "name": "Communaut\u00e9 \u2014 vitrine de projets"
+        },
+        {
             "name": "Administration"
         }
     ],
@@ -3655,6 +3658,850 @@
                 }
             }
         },
+        "/vitrine": {
+            "get": {
+                "operationId": "showcases.index",
+                "description": "Lecture publique : les projets dont le code est disponible, du plus r\u00e9cent au plus ancien.\nChaque projet est r\u00e9sum\u00e9 : \u00ab extrait \u00bb donne le d\u00e9but de sa description.",
+                "summary": "Parcourir la vitrine",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Texte cherch\u00e9 dans le titre et la description.",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 100
+                        }
+                    },
+                    {
+                        "name": "technologie",
+                        "in": "query",
+                        "description": "Slug d'une technologie (ex. laravel).",
+                        "schema": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "maxLength": 40
+                        }
+                    },
+                    {
+                        "name": "par_page",
+                        "in": "query",
+                        "description": "Nombre de projets par page (20 par d\u00e9faut, 50 au plus).",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "minimum": 1,
+                            "maximum": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ShowcaseSummaryResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShowcaseSummaryResource"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "post": {
+                "operationId": "showcases.store",
+                "description": "Le d\u00e9veloppeur colle l'adresse de son d\u00e9p\u00f4t GitHub public. La r\u00e9ponse est imm\u00e9diate (202) :\nla copie des fichiers se fait en arri\u00e8re-plan. Suivre \u00ab import.statut \u00bb avec GET /api/vitrine/{id}\njusqu'\u00e0 \u00ab termine \u00bb ou \u00ab echec \u00bb. GitHub n'est jamais modifi\u00e9 et aucun code n'est ex\u00e9cut\u00e9.",
+                "summary": "Pr\u00e9senter un projet",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreShowcaseRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "`ShowcaseResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ShowcaseResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/vitrine/{id}": {
+            "get": {
+                "operationId": "showcases.show",
+                "description": "Lecture publique. \u00ab import.statut \u00bb indique si le code est disponible.",
+                "summary": "Voir un projet de la vitrine",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ShowcaseResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ShowcaseResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            },
+            "patch": {
+                "operationId": "showcases.update",
+                "description": "R\u00e9serv\u00e9 au propri\u00e9taire. Seuls les champs envoy\u00e9s sont modifi\u00e9s ; le d\u00e9p\u00f4t ne se change pas.",
+                "summary": "Modifier la pr\u00e9sentation de son projet",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateShowcaseRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ShowcaseResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ShowcaseResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "showcases.destroy",
+                "description": "R\u00e9serv\u00e9 au propri\u00e9taire, ou \u00e0 un administrateur pour la mod\u00e9ration.",
+                "summary": "Retirer son projet de la vitrine",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/vitrine/{id}/fichiers": {
+            "get": {
+                "operationId": "showcase-files.index",
+                "description": "Lecture publique. Renvoie tous les chemins et leur taille, tri\u00e9s : l'\u00e9diteur en fait une arborescence.\nLe contenu de chaque fichier se lit avec GET /api/vitrine/{id}/fichiers/contenu.",
+                "summary": "Lister les fichiers d'un projet",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "chemin": {
+                                                        "type": "string",
+                                                        "description": "Chemin dans le d\u00e9p\u00f4t (ex. app/Models/User.php)."
+                                                    },
+                                                    "taille_octets": {
+                                                        "type": "integer"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "chemin",
+                                                    "taille_octets"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/vitrine/{id}/fichiers/contenu": {
+            "get": {
+                "operationId": "showcase-files.show",
+                "description": "Lecture publique. Renvoie le contenu du fichier tel quel, pour l'afficher dans l'\u00e9diteur.\nLe code n'est jamais ex\u00e9cut\u00e9.",
+                "summary": "Lire un fichier",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "chemin",
+                        "in": "query",
+                        "required": true,
+                        "description": "Chemin du fichier, tel que donn\u00e9 par la liste des fichiers.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 400
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "chemin": {
+                                                    "type": "string"
+                                                },
+                                                "taille_octets": {
+                                                    "type": "integer"
+                                                },
+                                                "contenu": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "chemin",
+                                                "taille_octets",
+                                                "contenu"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "- `validation_echouee` \u2014 Donn\u00e9es invalides ; \u00ab details \u00bb liste chaque champ fautif.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/vitrine/{id}/archive": {
+            "get": {
+                "operationId": "showcase-files.archive",
+                "description": "Lecture publique. L'archive contient la copie SamaCloud des fichiers de code.",
+                "summary": "T\u00e9l\u00e9charger le projet en .zip",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/zip": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Content-Disposition": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "example": "attachment; filename=.zip"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/vitrine/{id}/import": {
+            "post": {
+                "operationId": "showcases.reimport",
+                "description": "R\u00e9serv\u00e9 au propri\u00e9taire. Les fichiers de la copie SamaCloud seront remplac\u00e9s par ceux du d\u00e9p\u00f4t.\nR\u00e9ponse imm\u00e9diate (202), comme \u00e0 la cr\u00e9ation.",
+                "summary": "Relancer l'import depuis GitHub",
+                "tags": [
+                    "Communaut\u00e9 \u2014 vitrine de projets"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Identifiant du projet.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "`ShowcaseResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/ShowcaseResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "- `non_authentifie` \u2014 Jeton absent, expir\u00e9 ou r\u00e9voqu\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "- `compte_suspendu` \u2014 Le compte a \u00e9t\u00e9 suspendu par un administrateur.\n- `capacite_manquante` \u2014 Le jeton n'a pas la capacit\u00e9 exig\u00e9e par cette route.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "- `introuvable` \u2014 La ressource n'existe pas ou n'appartient pas \u00e0 ce compte.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "- `import_en_cours` \u2014 Un import de ce d\u00e9p\u00f4t n'est pas termin\u00e9.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "- `trop_de_requetes` \u2014 Limite de d\u00e9bit atteinte ; voir \u00ab details.reessayer_dans_secondes \u00bb.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Erreur"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/admin/signalements": {
             "get": {
                 "operationId": "admin.reports.index",
@@ -4292,6 +5139,17 @@
                     "message"
                 ],
                 "title": "Erreur"
+            },
+            "ImportStatus": {
+                "type": "string",
+                "description": "Avancement de la copie d'un d\u00e9p\u00f4t GitHub dans la vitrine.\n| |\n|---|\n| `en_attente` <br/> Demand\u00e9, en attente du worker. |\n| `en_cours` <br/> T\u00e9l\u00e9chargement et tri des fichiers en cours. |\n| `termine` <br/> Les fichiers sont disponibles. |\n| `echec` <br/> L'import a \u00e9chou\u00e9 (d\u00e9p\u00f4t introuvable, trop volumineux\u2026). |",
+                "enum": [
+                    "en_attente",
+                    "en_cours",
+                    "termine",
+                    "echec"
+                ],
+                "title": "ImportStatus"
             },
             "IssuedTokenResource": {
                 "type": "object",
@@ -5094,6 +5952,158 @@
                 ],
                 "title": "ServiceType"
             },
+            "ShowcaseResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "titre": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Markdown brut : c'est \u00e0 l'affichage de le mettre en forme et de le nettoyer."
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TechnologyResource"
+                        }
+                    },
+                    "auteur": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "depot": {
+                        "type": "string",
+                        "description": "D\u00e9p\u00f4t GitHub d'origine (\u00ab Voir sur GitHub \u00bb)."
+                    },
+                    "branche": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "demo_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Version en ligne (\u00ab Voir la d\u00e9mo \u00bb), si le d\u00e9veloppeur l'a renseign\u00e9e."
+                    },
+                    "import": {
+                        "type": "object",
+                        "properties": {
+                            "statut": {
+                                "description": "\u00ab en_attente \u00bb, \u00ab en_cours \u00bb, \u00ab termine \u00bb ou \u00ab echec \u00bb.\n| |\n|---|\n| `en_attente` <br/> Demand\u00e9, en attente du worker. |\n| `en_cours` <br/> T\u00e9l\u00e9chargement et tri des fichiers en cours. |\n| `termine` <br/> Les fichiers sont disponibles. |\n| `echec` <br/> L'import a \u00e9chou\u00e9 (d\u00e9p\u00f4t introuvable, trop volumineux\u2026). |",
+                                "$ref": "#/components/schemas/ImportStatus"
+                            },
+                            "erreur": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "Code de l'erreur si l'import a \u00e9chou\u00e9 (ex. \u00ab depot_introuvable \u00bb)."
+                            },
+                            "termine_le": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "statut",
+                            "erreur",
+                            "termine_le"
+                        ]
+                    },
+                    "nb_fichiers": {
+                        "type": "integer"
+                    },
+                    "taille_octets": {
+                        "type": "integer"
+                    },
+                    "incomplet": {
+                        "type": "boolean",
+                        "description": "Vrai si le d\u00e9p\u00f4t d\u00e9passait les limites : une partie des fichiers n'a pas \u00e9t\u00e9 copi\u00e9e."
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    },
+                    "modifie_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "titre",
+                    "description",
+                    "technologies",
+                    "auteur",
+                    "depot",
+                    "branche",
+                    "demo_url",
+                    "import",
+                    "nb_fichiers",
+                    "taille_octets",
+                    "incomplet",
+                    "cree_le",
+                    "modifie_le"
+                ],
+                "title": "ShowcaseResource"
+            },
+            "ShowcaseSummaryResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "titre": {
+                        "type": "string"
+                    },
+                    "extrait": {
+                        "type": "string",
+                        "description": "D\u00e9but de la description (200 caract\u00e8res), pour l'aper\u00e7u."
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TechnologyResource"
+                        }
+                    },
+                    "auteur": {
+                        "$ref": "#/components/schemas/AuthorResource"
+                    },
+                    "depot": {
+                        "type": "string"
+                    },
+                    "demo_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nb_fichiers": {
+                        "type": "integer"
+                    },
+                    "cree_le": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "titre",
+                    "extrait",
+                    "technologies",
+                    "auteur",
+                    "depot",
+                    "demo_url",
+                    "nb_fichiers",
+                    "cree_le"
+                ],
+                "title": "ShowcaseSummaryResource"
+            },
             "StoreAgentTokenRequest": {
                 "type": "object",
                 "description": "Donn\u00e9es de cr\u00e9ation d'un jeton d'agent IA.",
@@ -5183,6 +6193,61 @@
                     "technologies"
                 ],
                 "title": "StoreQuestionRequest"
+            },
+            "StoreShowcaseRequest": {
+                "type": "object",
+                "description": "Pr\u00e9sentation d'un nouveau projet dans la vitrine.",
+                "properties": {
+                    "titre": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Pr\u00e9sentation du projet, en Markdown.",
+                        "minLength": 20,
+                        "maxLength": 5000
+                    },
+                    "depot": {
+                        "type": "string",
+                        "description": "Adresse d'un d\u00e9p\u00f4t GitHub public, de la forme https:github.com/compte/depot.",
+                        "maxLength": 255
+                    },
+                    "branche": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Branche \u00e0 importer. Absente = la branche par d\u00e9faut du d\u00e9p\u00f4t.",
+                        "maxLength": 255
+                    },
+                    "demo_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri",
+                        "description": "Adresse de la version en ligne (\u00ab Voir la d\u00e9mo \u00bb), en HTTPS.",
+                        "maxLength": 255
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 8,
+                        "uniqueItems": true
+                    }
+                },
+                "required": [
+                    "titre",
+                    "description",
+                    "depot",
+                    "technologies"
+                ],
+                "title": "StoreShowcaseRequest"
             },
             "TechnologyResource": {
                 "type": "object",
@@ -5311,6 +6376,41 @@
                     }
                 },
                 "title": "UpdateQuestionRequest"
+            },
+            "UpdateShowcaseRequest": {
+                "type": "object",
+                "description": "Modification de la pr\u00e9sentation d'un projet. Seuls les champs envoy\u00e9s sont modifi\u00e9s.\nLe d\u00e9p\u00f4t ne se change pas : pour un autre d\u00e9p\u00f4t, on pr\u00e9sente un autre projet.",
+                "properties": {
+                    "titre": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 20,
+                        "maxLength": 5000
+                    },
+                    "demo_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri",
+                        "maxLength": 255
+                    },
+                    "technologies": {
+                        "type": "array",
+                        "description": "Liste compl\u00e8te des technologies \u00e0 garder.",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 8,
+                        "uniqueItems": true
+                    }
+                },
+                "title": "UpdateShowcaseRequest"
             },
             "UserResource": {
                 "type": "object",
